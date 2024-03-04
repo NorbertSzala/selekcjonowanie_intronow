@@ -1,0 +1,164 @@
+from Bio import AlignIO, SeqIO, Seq, pairwise2
+from Bio.pairwise2 import format_alignment
+
+
+min_length_aligned_sequence = 30 #Minimal lenght of sequence which could be an exon
+extreme_homology = 0.97 #percentage of homology of sequence, treshold #I assume two faulty aligned nucleotides per 100 (98%) and one more nt because sometimes latest nt can move from end of one sequence to beginning next sequence
+middle_homology = 0.9 #nothing at the moment
+
+
+path11 = './alingment_gen_transkrypt//EG_OG0030307_t1_g1_EG_PAM1_GP153_OV05.aln'
+path12 = './alingment_gen_transkrypt//EG_OG0030308_t2_g2_EG_PAM1_GP153_OV05.aln'
+path13 = './alingment_gen_transkrypt//EG_OG0030309_t3_g3_EG_PAM1_GP153_OV05.aln'
+path21 = './alingment_gen_transkrypt//EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05.aln'
+path22 = './alingment_gen_transkrypt//EH_OG0030308_t2_g2_EH_PAM1_GP153_OV05.aln'
+path23 = './alingment_gen_transkrypt//EH_OG0030309_t3_g3_EH_PAM1_GP153_OV05.aln'
+path31 = './alingment_gen_transkrypt//EL_OG0030307_t1_g1_EL_PAM1_GP153_OV05.aln'
+path32 = './alingment_gen_transkrypt//EL_OG0030308_t2_g2_EL_PAM1_GP153_OV05.aln'
+path33 = './alingment_gen_transkrypt//EL_OG0030309_t3_g3_EL_PAM1_GP153_OV05.aln'
+
+
+def cutting_scrap_right(plik, acceptable_gap_length):
+    
+    gaps_signs = "-" * acceptable_gap_length #maximum length of gaps one by one in sequence
+    
+    alignment = AlignIO.read(plik, "clustal") #loading data witch "clustal" extension 
+    
+        
+        
+    while True:
+        first_nucleotides_pair = alignment[:, 0]#first nucleotides in both strands as variable
+        if "-" in first_nucleotides_pair: #deleting mismatches at the start #do tej pory wszystko git. program odnajduje znak "-" w pierwszej. parze
+            alignment = alignment[:, 1:]
+            #print(f"alignment po obrobce:\n{alignment}") #chekpoint
+            continue
+    
+            
+        
+        #changing extension
+        seq1 = alignment[0].seq #from whole variable choose only .seq #upper strand
+        seq2 = alignment[1].seq #lower strand
+
+        
+        #Counting distance:
+        first_gaps_position_seq1 = seq1.find(gaps_signs) #getting index of first gap. There is also included gap in genomic sequence - made it intentionally
+        first_gaps_position_seq2 = seq2.find(gaps_signs)  #this code prints alignment since 1st to certain number (without gaps at the end!)
+        #print(f"first gap position in first sequence:{first_gaps_position_seq1}, in 2nd sequence: {first_gaps_position_seq2}") #checkpoint
+        
+        if first_gaps_position_seq2 < 0:
+            distance_between_first_nt_and_gap = first_gaps_position_seq1
+        else:
+            distance_between_first_nt_and_gap = min(first_gaps_position_seq1, first_gaps_position_seq2)
+
+        
+        local_alignment = pairwise2.align.localxx(seq1[:distance_between_first_nt_and_gap], seq2[:distance_between_first_nt_and_gap], \
+                                                    one_alignment_only = True) #score_only = True print only score
+        #I chase function parameters like "xx" what means no gap penalty while opening gaps or longering them and no penalties for mismatch. Just pure score of alignment to count homology
+        #print("local_alignment:", local_alignment) #checkpoint
+       
+        try: #obsluga wyjatkow
+            local_homology_percentage = (local_alignment[0].score / distance_between_first_nt_and_gap) # that sign "[]" becouse local_alignment's type is list
+        except IndexError:
+            print("index error", len(seq1))
+            if len(seq1) < 100:
+                print(f"\n \n {str(plik)} sequence is too short LEWO \n")
+                break
+            continue
+        
+        
+        if local_homology_percentage < extreme_homology:
+            #print(f"\n Too low score of homology. \n alignment: {alignment[:, :50]} \n score: {local_alignment[0].score}, distance: {distance_between_first_nt_and_gap}, percent: {round(local_homology_percentage, 2)*100}%, \n {local_alignment}")
+            alignment = alignment[:, distance_between_first_nt_and_gap:] 
+            
+        else:
+            if distance_between_first_nt_and_gap < min_length_aligned_sequence:
+                #print(f"\n alignment is too short. \n distance between sequences {distance_between_first_nt_and_gap}, \n alignment: {alignment}, \n score: {local_alignment[0].score}, distance: {distance_between_first_nt_and_gap}, procentowo: {round(local_homology_percentage, 2)*100}%, \n {local_alignment}")
+                alignment = alignment[:, distance_between_first_nt_and_gap:]
+            else:
+                print(f"""\n \n \n victory lewo! \n distance between sequences: {distance_between_first_nt_and_gap},
+                alignment: {alignment[:, :50]}, 
+                score: {local_alignment[0].score}, dystans: {distance_between_first_nt_and_gap}, 
+                percent: {round(local_homology_percentage, 4)*100}%, \n \n local alignment to confirm: \n{local_alignment}""")
+                break
+
+######################### TERAZ OD PRAWEJ DO LEWEJ #######################  
+
+    
+    while True:
+        last_nucleotides_pair = alignment[:, -1]#last nucleotides in both strands as variable
+        if "-" in last_nucleotides_pair: #deleting mismatches at the end
+            alignment = alignment[:, :-1]
+            #print(f"alignment check:\n{alignment[:, -50:-1]}") checkpoint
+            continue
+                
+            
+#tu jest problem - funkcja usuwa o jedną pare nukleotydow za duzo, mimo ze nie są ona gap "-". - zachodzi jedna dodatkowa iteracja Na razie pomijam
+        #jak nic nie podziała to trzeba bedzie zmierzyc odleglosc od ostatniego nukleotydu do pierwszego (szerokosc gapow) i usunac to w petli for
+        
+        #changing extension
+        seq1 = alignment[0].seq #from whole file choose only .seq #upper strand
+        seq2 = alignment[1].seq #lower strand
+        
+       
+        last_gaps_position_seq1 = seq1.rfind(gaps_signs)  #Counting distance: #getting index of first gap. There is also included gap in genomic sequence - made it intentionally
+        last_gaps_position_seq1 = last_gaps_position_seq1 + acceptable_gap_length
+        
+        last_gaps_position_seq2 = seq2.rfind(gaps_signs)  #this code prints alignment since 1st to certain number (without gaps at the end!)
+        last_gaps_position_seq2 = last_gaps_position_seq2 + acceptable_gap_length #now we have to add length of gap to index, because python starts counting from 0 nt, and we just change direction of counting.
+        #print("seq1:", last_gaps_position_seq1, "seq2:", last_gaps_position_seq2) checkpoint
+        
+        
+        if last_gaps_position_seq2 < 0: #it means, if there is no gaps in second sequention, gap position is gap position in seq1. Additional, rfind() function return "-1" if it won't find any gaps in seq
+            distance_between_first_nt_and_gap = (len(seq1) - last_gaps_position_seq1)
+            distance_between_first_nt_and_gap = distance_between_first_nt_and_gap - 1 #correction to counting from 0th index
+            #print("pierwszy", distance_between_first_nt_and_gap)
+        else:
+            distance_between_first_nt_and_gap = (len(seq1) - max(last_gaps_position_seq1, last_gaps_position_seq2))#tutaj napisalem taki kod, ktory wybiera najmniejsza odleglosc miedzy pierwszym nukleotydem a najblizsza podwojna przerwa. Ale to moze uwzglednic rowniez przerwe w sekwencji genowej - tak zostawiam
+            #print("drugi", distance_between_first_nt_and_gap)
+            
+            
+            local_alignment = pairwise2.align.localxx(seq1[-distance_between_first_nt_and_gap:], seq2[-distance_between_first_nt_and_gap:], \
+                                                    one_alignment_only = True) #score_only = True print only score #I chase function parameters like "xx" what means no gap penalty while opening gaps or longering them and no penalties for mismatch. Just pure score of alignment
+        #print("local_alignment:", local_alignment) #checkpoint
+        #mam wrazenie ze python nie chce mi lapac ostatniego nukleotydu w komendzie: [liczba:] - zrobil alignment dla 180nt gdzie dlugosc gapu to 180
+
+        
+
+        try: #obsluga wyjatkow
+            local_homology_percentage = (local_alignment[0].score / distance_between_first_nt_and_gap) #that sign "[]" becouse local_alignment's type is list
+        except IndexError:
+            if len(seq1) < 100:
+                print(f"\n \n {str(plik)} sequence is too short PRAWO \n")
+                break
+            continue
+            #niestety ten warunek jakoś nie działa na sekwencje 32
+
+        
+        if local_homology_percentage < extreme_homology:
+            #print(f"\n Alignment ma zbyt niska homologie. \n alignment: {alignment[:, -50:]} \n score: {local_alignment[0].score}, \dystans: {distance_between_first_nt_and_gap}, procentowo: {round(local_homology_percentage, 2)*100}%, \n {local_alignment}")
+            alignment = alignment[:, :-distance_between_first_nt_and_gap] 
+            
+        else:
+            if distance_between_first_nt_and_gap < min_length_aligned_sequence:
+                #print(f"\n alignment jest za krotki. \n dystans miedzy sekwencjami {distance_between_first_nt_and_gap}, \n alignment: {alignment}, \n score: {local_alignment[0].score}, dystans: {distance_between_first_nt_and_gap}, procentowo: {round(local_homology_percentage, 2)*100}%, \n {local_alignment}")
+                alignment = alignment[:, :-distance_between_first_nt_and_gap]
+            else:
+                print(f"""\n \n \n victory prawo! \n distance between sequences {distance_between_first_nt_and_gap},
+                alignment: {alignment[:, -50:]}, 
+                score: {local_alignment[0].score}, distance: {distance_between_first_nt_and_gap}, 
+                percent: {round(local_homology_percentage, 4)*100}%, \n \n local alignment to confirm: \n{local_alignment}""")
+                break
+    
+    #print("\n\n\n\n", seq1, "\n \n\n\ sekwencja druga:\n \n \n\n\n", seq2)
+    #print(alignment[:, :])
+
+
+cutting_scrap_right(path11, 2)
+cutting_scrap_right(path12, 2)
+cutting_scrap_right(path13, 2)
+cutting_scrap_right(path21, 2)
+cutting_scrap_right(path22, 2)
+cutting_scrap_right(path23, 2)
+cutting_scrap_right(path31, 2)
+cutting_scrap_right(path32, 2)
+cutting_scrap_right(path33, 2)
