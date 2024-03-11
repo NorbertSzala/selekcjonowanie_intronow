@@ -1,0 +1,418 @@
+CLUSTAL format alignment by MAFFT (v7.511)
+
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              gtg-------------------------------------------------ct----ct
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     gaggggttcaatctgctcgtcgtgggtttcctccacggaatcagtgcttcacccctgcct
+                                                   * *                                                 *.    **
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              tccgatctattttttttc------------------------------------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     tcccacctcttggtggacctggaaagggaggctgagcctccattagacctcgttcagcct
+                                                   *** *.** **  *   *                                          
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              ------------------------------------------------------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     tggtgcattgatggggtgtacatgcatccgcccattcgtctcccaccgatttgagtcgcc
+                                                                                                               
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              -------------------gggcgctgttctgtgccacacccataataccaatggcggag
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     cgaaccctccctgctcccagggcgctgttctgtgccacacccataataccaatggcggag
+                                                                      *****************************************
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              gaggacgccccggacgagaacacgatgatctactggacgggcttccagggggacgaggag
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     gaggacgccccggacgagaacacgatgatctactggacgggcttccagggggacgaggag
+                                                   ************************************************************
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              gacgacctcggggagcggtgcgagcagcgcgagcggatgttcttctcccgcgactactgg
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     gacgacctcggggagcggtgcgagcagcgcgagcggatgttcttctcccgcgactactgg
+                                                   ************************************************************
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              gcccgccc----------------------------------------------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     gcccgccccgccccttgggcgttgcctccgaccccccctccccaaatgttagcagccctg
+                                                   ********                                                    
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              ------------------------------------------------------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     agccgatcggttgaaacccaaatataaacaatgggttgcttatatcttagggggtctaaa
+                                                                                                               
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              ------------------------------------------------------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     cagtgcagcgtggacggagataggggaggggggcaacagagtcagctacgggggagggga
+                                                                                                               
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              ------------------------------------------------------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     ggttgtgactagacccccctcccccgggagttggtaaaaatttgtatggtgcggagagag
+                                                                                                               
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              ------------------------------------------------------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     tggagtgagaaagtgaggagaaagcgcaccgcaacctgcttctggttgctaacccagagt
+                                                                                                               
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              ------------------------------------------------------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     ggaatacagatagggatgcaactcaggggtttgccaatcacttggtcacagggcggccac
+                                                                                                               
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              ------------------------------------------------------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     cccctccccatggtgattgacggggtttggcctctggggtgtattttctgcgtggttcta
+                                                                                                               
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              ------------------------------------------------------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     aaagaaagaaaatatttttttttaaaagtggaagggacccctgaaaattggtaatttttt
+                                                                                                               
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              ------------------------------------------------------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     atgcaggacatctacaacctctacccgaagtcaccgtctctgcctctcgcacataaattt
+                                                                                                               
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              ------------------------------------------------------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     gtgcaatgccacgcaccaagagaacaacgttttgccacaggacggttattttttgcacgt
+                                                                                                               
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              ---------------------------------------caacccattccatctcgggcc
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     tgctatcttctaagctgcacagtgggcaacgtcctgccgcaacccattccatctcgggcc
+                                                                                          *********************
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              tcggcggaaaaatggcgatttcctcggcgtcaaagtcgtgaagaaccgcttctttgtgcc
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     tcggcggaaaaatggcgatttcctcggcgtcaaagtcgtgaagaaccgcttctttgtgcc
+                                                   ************************************************************
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              gtacctctatggtggccttgaggaac----------------------------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     gtacctctatggtggccttgaggaacggtatcggccctcccaccccaatgcggtattttt
+                                                   **************************                                  
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              ------------------------------------------------------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     acttttcctctcacattcccatcattctctcttcccttttccacctcgcatgccccctcc
+                                                                                                               
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              ------------------------------------------------------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     tccccacccgttgcctctccctctctctatgcgctcctccagttaattctgcttcactca
+                                                                                                               
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              -------------------gggtccaccacgcccggggcatgacccacgaccacctcgtg
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     acaccctggctcttgcgcagggtccaccacgcccggggcatgacccacgaccacctcgtg
+                                                                      *****************************************
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              ccgtatgtgggctgctattgtgaccacagccgagaggaaacactgctatggcagcaccat
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     ccgtatgtgggctgctattgtgaccacagccgagaggaaacactgctatggcagcaccat
+                                                   ************************************************************
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              gtacagggggc-------------------------------------------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     gtacagggggcgtccaggctttgacgcaaggaggcttgtagctaaacaggtggagggttg
+                                                   ***********                                                 
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              ------------------------------------------------------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     cgtttcgattgacccgccccagggaggaaaaaccatctttcctggaagaaaaacgtttag
+                                                                                                               
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              ------------------------------------------------------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     ggtatttctcttgggtcctggaaagcccaaaaaattaaaaaagacaacacaccttctggg
+                                                                                                               
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              ------------------------------------------------------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     ccacatttgaccccccaacgcacctaaatgctttcggctctttatcctgacgtttttacc
+                                                                                                               
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              ------------------------------------------------------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     cccgaggccatggcattcttatgctgggggggggcggaccccaccttctaacctggctta
+                                                                                                               
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              -------------------gtctttggagaccctgctgcggaaacgcaggcgcgggttcg
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     tatatcaaagcctgggggtgtctttggagaccctgctgcggaaacgcaggcgcgggttcg
+                                                                      *****************************************
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              atgagatgcaggtgcgagtct---------------------------------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     atgagatgcaggtgcgagtctgctgggtgccgaccgcactccacatgccacggttgtcat
+                                                   *********************                                       
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              ------------------------------------------------------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     gtctattgtgtaccatacagccctccccttggtgggaaaaaatgtacccaccaaacatgg
+                                                                                                               
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              ------------------------------------------------------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     aaggattttcagcaagaagcatgccaaccaaaggaagtaattcacggtcttcatgaataa
+                                                                                                               
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              ------------------------------------------------------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     aacttaggtgtgaacatttcagttgtgactcatgtttggtaggagggcaggtgtctggat
+                                                                                                               
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              ------------------------------------------------------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     gtgagtatggcagggtcatttccaggccccagggtggtggttttacaacccctttgagtt
+                                                                                                               
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              ------------------------------------------------------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     cgcaatgggagtggtttcccgttgaaacataacggtgccaaccgatagttcatacattca
+                                                                                                               
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              ------------------------------------------------------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     ttgttgtgattggattcaagagcagcacccccaacgtttccgcctgcttgtcccctgtgg
+                                                                                                               
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              ------------------------------------------------------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     tcgggaggactgcccaatgccactctaccccttccagtttggtctcttgttccctcgggg
+                                                                                                               
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              ------------------------------------------------------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     gtgggcggcaggccctgggcacccattttccttccatccccagtggggggtcggggggca
+                                                                                                               
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              -----------------------------------------------ggctgtacagcgt
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     ggccagtgggggttggctgggccccaggggcggtcggccccttggccggctgtacagcgt
+                                                                                                  *************
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              gctgaagggcctgcagcacctccaccagcacggctgcgtgctcggcaagctgcgcgcctc
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     gctgaagggcctgcagcacctccaccagcacggctgcgtgctcggcaagctgcgcgcctc
+                                                   ************************************************************
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              caaggtggtcctcgaccgggacggtgttccggtactggtggactgggcctgcccgccgaa
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     caaggtggtcctcgaccgggacggtgttccggtactggtggactgggcctgcccgccgaa
+                                                   ************************************************************
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              cctgttcaagtccatctacac---------------------------------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     cctgttcaagtccatctacacgtgtgccccgccccacatccccccgacccaggcaaccgg
+                                                   *********************                                       
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              ------------------------------------------------------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     ccccctatgggcctggtgcaaggtagacagccagtcgtgttttttttgtgtccgagggag
+                                                                                                               
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              ------------------------------------------------------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     gctgtcaccctctgggtagcttcctgcctcgccaactaaacccccaggtcgaaaggaaga
+                                                                                                               
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              ------------------------------------------------------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     cccgatttgaggacagcgtggagccttcaaggtggttttcattgatggctctagtgtccc
+                                                                                                               
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              ------------------------------------------------------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     agcaatgaccaccttttgcccaggccatttatgattcatttcatgcacatattttttttt
+                                                                                                               
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              ------------------------------------------------------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     gtggtgccatcgacagatcagtccagcccagagtctgagagctctctctctctctctctc
+                                                                                                               
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              ------------------------------------------------------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     tctcgctctccctctctctctctctcccttctcctggctgctttatacatcattgcctgt
+                                                                                                               
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              -------gtacaagcacgtcaatgtgatggcgccagaggtccagagcggctcggattttg
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     cgcacaggtacaagcacgtcaatgtgatggcgccagaggtccagagcggctcggattttg
+                                                          *****************************************************
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              ggcccgcggccgacgtttggagctttgggctgctcct-----------------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     ggcccgcggccgacgtttggagctttgggctgctcctgtccaggcctatcgtggtttata
+                                                   *************************************                       
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              ------------------------------------------------------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     tgggacagaccgcgctcgtgcctctggctgggctccacggcctgggggagtattttttgt
+                                                                                                               
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              ------------------------------------------------------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     ggacaacctcgttttgattgggtattgtatagcttcgccttggggaacagaatgcatggt
+                                                                                                               
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              ------------------------------------------------------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     gccctctgtcgtgcatcattggcgaagtccgtctccatttcctttgagaccggagtccag
+                                                                                                               
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              -----------------------------aattgagctcctgactggacagcccgccttc
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     ggttgtggtcccttcgaggccctggcggcaattgagctcctgactggacagcccgccttc
+                                                                                *******************************
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              cccgtctccgaggagacccaactccggttccgggcggcgcaccctgaggaggacgccaca
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     cccgtctccgaggagacccaactccggttccgggcggcgcaccctgaggaggacgccaca
+                                                   ************************************************************
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              gtgggggcgatggaggcccgggacatcaagcaccggtgctct------------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     gtgggggcgatggaggcccgggacatcaagcaccggtgctctggccgggctgcgctctgg
+                                                   ******************************************                  
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              ------------------------------------------------------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     cccccactgtattgagggaggatagggagcctaaaatactgttgtgtgtggtgttgtgtg
+                                                                                                               
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              ------------------------------------------------------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     ggagtgtgtgtggtgtgtgtgtgtgtgtgtgtgtgtgtgtgttgtgtggtgtgtctgtgt
+                                                                                                               
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              ------------------------------------------------------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     aaaaggggcgattaaatttcctgagaaatacaaaaagggcgattaaatttcctgagaaat
+                                                                                                               
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              ------------------------------------------------------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     acaccgctctggctggtggagataaaaagatgccatttttttctggatggtttcaaggac
+                                                                                                               
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              ------------------------------------------------------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     tccgccatattttgtaccctgcgacatttgtcgatgcaaaatttctctctaccacgaact
+                                                                                                               
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              ------------------------------------------------------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     cggcgagcgttcgcaatcttcgttcccattgaggaaggttcttctggagggtcgcgagcg
+                                                                                                               
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              ------------------------------------------------------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     ctgccaaggctctcgatcaggctttgacgtaaggaggccttcattcatggtggtggacgg
+                                                                                                               
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              ------------------------------------------------------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     ggggtgtcccaggaccccccctccaggaccgggggggtcccaatcaccaccccccccccc
+                                                                                                               
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              ------------------------------------------------------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     accttccggggtccgaccaaccccccacggaccgaaaatttttttctcctgggcgcttcg
+                                                                                                               
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              ------------------------------------------------------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     tgcccggggggtttgagaaaatgggtatttttatgtttcaaaaaggccaaaatttttgaa
+                                                                                                               
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              ------------------------------------------------------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     aatttttgaaaaaatctcgaattttttggctttttggaaacatagaaaatacccattttc
+                                                                                                               
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              ------------------------------------------------------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     tcgaaaatacttttggccattttttggcccctgaaagtaccctccaattttttttgtgct
+                                                                                                               
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              ------------------------------------------------------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     ttgtggtggtggtggggggtgtcccgagactcctccctccaggaccggggggggtggtcc
+                                                                                                               
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              ------------------------------------------------------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     cccaccacctgctcttatgtcaaagcctgctcccgatcctctccaacccggttcgggttc
+                                                                                                               
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              ------------------------------------------------------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     tgggctgaaggatatatttttaaccaatagtattcataataatcgaagctcaaataaaaa
+                                                                                                               
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              ------------------------------------------------------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     acgacggtgtagcgcatgtgtcatgtgagtaaatttcctacctgcccccctcctgtccaa
+                                                                                                               
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              ------------------------------------------------------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     cgattgggcttgtccaacgaccaccccctggttggatgtgatgtttatttggaaaaagac
+                                                                                                               
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              ------------------------------------------------------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     gacaccccctggtgagagacgatcattagtggtcgttggacaaggggtggggaacaggta
+                                                                                                               
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              ------------------------------------------------------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     atattttttttcagaacattaatcccaaccctgttccttacttcaaggtaaccccttttc
+                                                                                                               
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              ------------------------------------------------------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     ttcacagattttcctgaaggtttgcattttcttctaaccctatctttttccataacgttt
+                                                                                                               
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              ------------------------------------------------------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     tggatcctttttcttacgaagcattttggacccatgttctcccctaaccctaccctctca
+                                                                                                               
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              ------------------------------------------------------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     gtaatacatcattttttgtttcctttctgacaagggaaggtacatttttatgcatcccgc
+                                                                                                               
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              ------------------------------------------------------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     ttcatgtagtagacgctggaggaggatcgcgagcgtttgccagtattttgaaatcctcca
+                                                                                                               
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              ------------------------------------------------------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     cctgggagaatccctagacctccaagcctagcaatacttgtgatccacatcgggtgcgac
+                                                                                                               
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              ------------------------------------------------------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     cggacgctcctcataccaactccgcatacagttccaattttcaacatcaacccatgtatg
+                                                                                                               
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              ------------------------------------------------------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     agacacccatgtgggtcgaaaaagaaataggtattttgcgcattctgaggagtcaaatca
+                                                                                                               
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              ------------------------------------------------------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     aagggattgtataaacgtcgacgaaaatctcgctgggacatggtgactgacttttctggc
+                                                                                                               
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              ------------------------------------------------------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     tgtaaagtgcaatttgataacaaagggcactccttcaaagcgtgtatttttaagagaaag
+                                                                                                               
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              ------------------------------------------------------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     tcgccgcagggcaaagttggcaggaggcaggggatggcaggggtgcacatgactggcagg
+                                                                                                               
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              --------------------------------------------------------atga
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     tcttgcaggggcggtgggtggggcggtgggtggggcatgtgacgccgtccggggccatga
+                                                                                                           ****
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              cgccggaagctctcgccctcgccctgcgctgcctcgccccggaccccgcccgccggccca
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     cgccggaagctctcgccctcgccctgcgctgcctcgccccggaccccgcccgccggccca
+                                                   ************************************************************
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              ------------------------------------------------------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     ccgtggccagccttctttttaagggctgctggaccccccccccctggaggagtgtattga
+                                                                                                               
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              ------------------------------------------------------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     gtggctggaattttttttgagggaggttgtttcccctggaaaaacaacaaccaatcaatc
+                                                                                                               
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              -----------------------------ccgtggcccagctgctggcggacgacttctt
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     actcggggggttcttaaaaagaagcctgcccgtggcccagctgctggcggacgacttctt
+                                                                                *******************************
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              tgccgcccctgcggt---------------------------------------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     tgccgcccctgcggtgcccaggctgaagttggcattgcattggacctcaatcatcccccc
+                                                   ***************                                             
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              ------------------------------------------------------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     cctcgggttgctaaccaacgaggccttgcatcgaaccaggtggtggaccccctcccttcc
+                                                                                                               
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              ------------------------------------------------------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     tcctcctcgtgaacaaggtccggacccagctgccatcccttggatggaaaacgagggttg
+                                                                                                               
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              ------------------------------------------------------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     tattttcggagccttcaagcccagaaattgaccaaataacaaggcacaagttatctggag
+                                                                                                               
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              ------------------------------------------------------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     aagtttggctcatgtcagtggttgtagaaaagcatctacaaattggtgggtgtatatgta
+                                                                                                               
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              ------------------------------------------------------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     tatgtatatatgtatacacaccgatacatatatgtatacacctatatatatgcatatata
+                                                                                                               
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              ------------------------------------------------------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     catacatgtatatgtacacacacacacacacacggaacaaatttttgaccgactggaata
+                                                                                                               
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              -------------------------------gaagcggcaggcgctgctcggcctgaagc
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     cgcaccccccctggcgccacagcctgctggggaagcggcaggcgctgctcggcctgaagc
+                                                                                  *****************************
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              gggcgttgacggaccgcatggcccgcacgcaggccgccgtggcgatggcgaagagcgcag
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     gggcgttgacggaccgcatggcccgcacgcaggccgccgtggcgatggcgaagagcgcag
+                                                   ************************************************************
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              aggaggacgacgaggaggaggaggcggacgagtcgccgcgcagcccgccgagccc-----
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     aggaggacgacgaggaggaggaggcggacgagtcgccgcgcagcccgccgagccccccgc
+                                                   *******************************************************     
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              ------------------------------------------------------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     ccgcccccgccgtccctgtgccccctccccgctgtgtgaaacactcctgattgaccccgc
+                                                                                                               
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              ------------------------------------------------------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     ccacccgtatatcggcgaccccaggcagggccagtgcgatccatgccacgtctcttgatc
+                                                                                                               
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              ------------------------------------------------------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     tctctcatgtgtgtgcatgcgcataggaagccatagatgtgtgtgggaatggtggggtgc
+                                                                                                               
+
+EH_OG0030307_t1_g1_EH_PAM1_GP153_OV05              ---------------
+EH_scaffold_OG0030307_t1_g1_EH_PAM1_GP153_OV05     cccgctttgcggcac
+                                                                  
