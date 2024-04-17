@@ -1,0 +1,27 @@
+
+#!/bin/bash
+
+#skrypt usuwajacy znaki "-" w plikach fasta, ktore nie zostaly poddane przyrownaniu mafftem.
+#Ogolnym problemem jest to, ze funkcja cutting_scrap dziala dobrze na plikach ktore zostaly przygotowane recznie, ale slabo sobie radzi na automatycznych.
+#plik automatyczny od tego ktory dostałem od Profesorka różni się właśnie brakiem obecności tych znaków "-". Chce zweryfikować czy to jest rzeczywisty powód błędów
+
+
+directory_to_fastas_files_with_minuses="/home/norbert/mrdn/euglena/kod_i_pliki/surowe_pliki_plus_minus_500/raw_reads_9/merging_fastas"
+
+for file in "$directory_to_fastas_files_with_minuses"/*.fasta; do
+	fasta_file=$(basename "$file")
+    fasta_file_path="$directory_to_fastas_files_with_minuses/$fasta_file"
+    echo "$fasta_file_path"
+
+    if [ -f "$file" ]; then
+        while IFS= read -r line; do
+            if [[ ! $line == ">"* ]]; then
+                sed -i 's/-//g' "$fasta_file_path"
+                sed -i 's/\s//g' "$fasta_file_path"  # Usuwa wszelkie znaki białe
+            else
+                echo "omijam ta linie $line"
+            fi
+        done < "$file"
+    fi
+    echo -e "\n"
+done
