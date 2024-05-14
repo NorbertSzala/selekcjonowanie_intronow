@@ -1,0 +1,88 @@
+#!/bin/bash
+
+#opis działania i problematyka:
+	# programem MAFFT zrobiłem przyrównanie które zapisałem w formaci clustal. Do tego przyrównania napisałem kod w pythonie który bazuje na strukturze clustals (jako lista) i go tam odpowiednio obrabia
+	#clustals niestety ma odgórny limit znaków 14/15 w headerze, przez co headery clustalowe będą miały niepełne, nic nie mówiące lub czasami błędnie wskazujące nazwy
+	#ten kod podmienia nazwe z clustala na nazwe z fasta. Nazwa fasta pochodzi z pliki niealignmentowanego, który służył jako input do funkcji robiacej alignment. Stad moja pewnosc o zgodnosci nazw plikow
+
+#KONIECZNE DO SPELNIENIA ZALOZENIA
+	#pliki z których pobieramy pełną nazwę z formatu fasta muszą mięć tą samą nazwę co pliki clustals do których wklejamy zmodyfikowaną nazwę
+
+
+
+#na tą chwile podwojne dzialanie tego skryptu spowoduje bledami
+
+#dobrze podmieniamy te fragmenty, pozostaje sprawdzic czy roznice w dlugosci w nazwie nie powoduja bledow w moim kodzie
+
+#dziala fajnie wszystko super ale dupa bo pakiet w pythonie AlignIO potrzebuje clustala z 15 znakami w headerze
+
+#ogolnie to tak: header seq1 jest dluzszy niz header seq2. Moze to jest przyczyna dlaczego alignIO nie obsluguje. Sprobujmy je zrownac ze soba dlugosciami - ostatnia deska ratunku
+
+
+
+####################
+#PLAN NA TERAZ - DO KAZDEJ ZMIENNEJ FASTA_HEADER DOPISZ TYLE ZNAKOW BY LACZNA DLUGOSC TEJ ZMIENNEJ BYLA ROWNA 40
+#################333
+
+# Katalog zawierający pliki
+directory_to_wrong_named_clustals="/home/norbert/mrdn/euglena/kod_i_pliki/surowe_pliki_plus_minus_500/raw_reads_9/after_mafft_clustals"
+directory_to_properly_named_fastas="/home/norbert/mrdn/euglena/kod_i_pliki/surowe_pliki_plus_minus_500/raw_reads_9/merging_fastas"
+
+
+
+
+
+
+for clustal_file_path in "$directory_to_wrong_named_clustals"/*; do
+	fasta_file=$(basename "$clustal_file_path" | sed 's/\.aln$/.fasta/')
+	echo "fasta file to: $fasta_file"
+	
+	fasta_file_path="$directory_to_properly_named_fastas/$fasta_file" #sciezka do konkretnego pliku
+	#echo "$fasta_file_path"
+	
+	if [ -f "$fasta_file_path" ]; then  # Sprawdzamy, czy plik FASTA istnieje
+		fasta_header=""
+		while IFS= read -r line; do
+			if [[ $line == ">"* ]]; then
+				fasta_header="$line"
+				fasta_header="${line#>}"
+				echo "ta linia zaczyna się od '>': $line"
+				echo "fasta header to: $fasta_header"
+				
+				# Obliczamy długość aktualnego nagłówka
+                header_length=${#fasta_header}
+
+                # Jeśli długość nagłówka jest mniejsza niż 40, dodajemy odpowiednią liczbę spacji
+                if (( header_length < 40 )); then
+                    spaces_to_add=$((40 - header_length))
+                    spaces=$(printf '%*s' "$spaces_to_add" '')
+                    fasta_header="$fasta_header$spaces"
+                fi
+				
+				
+				
+				pierwsze_15_znakow="${fasta_header:0:15}"
+				echo "pierwsze 15 znakow: $pierwsze_15_znakow"
+				#dodaj tutaj kod który  w pliku clustal_file_path odnajdzie zmienną pierwsze_15_znakow a następnie podmieni ją na zmienną fasta_header	
+				sed -i "s/$pierwsze_15_znakow/$fasta_header/g" "$clustal_file_path"
+
+			fi
+		done < "$fasta_file_path"
+	
+		
+			
+			
+    else
+        echo "Plik FASTA nie istnieje dla pliku clustal: $clustal_file_path"
+    fi
+	echo -e "\n \n"
+	
+done
+
+
+
+#mamy problem bo ten bash jakos dziwnie iteruje
+#gdy daje mu polecenie przeiteruj przez wszystkie linie ktore zaczynaja sie od znaku ">", a nastepnie po kazdej linii napisz tą linijkie, to on iteruje po wszystkich tych linijkach a potem wypisuje tą linijke, powtarza to dwukrotnie
+#				echo "$line" | sed "s/$pierwsze_15_znakow/$fasta_header/g"
+
+
