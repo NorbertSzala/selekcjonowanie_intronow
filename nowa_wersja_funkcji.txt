@@ -1,0 +1,678 @@
+from Bio import AlignIO, SeqIO, Seq, pairwise2, Align
+from Bio.pairwise2 import format_alignment
+import pandas as pd
+import os
+import numpy as np
+import time
+
+
+#ASSUMPTIONS
+#- both file, path_to_file_before_MAFFT and path_to_file_after_MAFFT have to have the same name
+#- they have to be .fasta
+
+
+min_length_aligned_sequence = 30 #Minimal lenght of sequence which could be an exon
+extreme_homology = 0.97 #percentage of homology of sequence, treshold #I assume two faulty aligned nucleotides per 100 (98%) and one more nt because sometimes latest nt can move from end of one sequence to beginning next sequence
+
+#9 plikow
+#path_to_file_before_MAFFT = "/home/norbert/mrdn/euglena/kod_i_pliki/surowe_pliki_plus_minus_500/raw_reads_9/merging_fastas"
+#path_to_file_after_MAFFT = "/home/norbert/mrdn/euglena/kod_i_pliki/surowe_pliki_plus_minus_500/raw_reads_9/fastas_after_mafft_na_probe"
+
+#ten niedzialajacy pierwszy LON309
+path_to_file_before_MAFFT = "/home/norbert/mrdn/euglena/kod_i_pliki/surowe_pliki_plus_minus_500/raw_reads_9/roboczy_przed_fastami/"
+path_to_file_after_MAFFT = "/home/norbert/mrdn/euglena/kod_i_pliki/surowe_pliki_plus_minus_500/raw_reads_9/roboczy_po_fastach/"
+
+#pozostale 8
+#ath_to_file_before_MAFFT = "/home/norbert/mrdn/euglena/kod_i_pliki/surowe_pliki_plus_minus_500/raw_reads_9/inne_przed_fastami/"
+#path_to_file_after_MAFFT = "/home/norbert/mrdn/euglena/kod_i_pliki/surowe_pliki_plus_minus_500/raw_reads_9/inne_po_fastach/"
+
+
+#DODAJ FRAGMENT MOWIACY ZE JESLI: NA RAZIE SIE WSTRZYMAM, MOZE NIE JEST TO POTRZEBNE
+    #LICZBA INTRONOW >= LICZBIE EKSONOW TO BREAK
+    #LICZBA INTRONOW + EKSONOW <= 3 TO BREAK
+
+
+#dodac tabelke tak by mowila ile bylo odczytow na inpucie, ile przeszło pozytywnie a ile zostało przerwanych w trakcie
+#dodatkowa tabelka ze wszystkimi eksonami które byly za krótkie teżhbn
+
+
+
+def cutting_scrap(path_to_file_before_MAFFT, path_to_file_after_MAFFT, acceptable_gap_length):
+    data_frames = []
+    gff_data_frames = []
+    gaps_signs = "-" * acceptable_gap_length #maximum length of gaps in sequence in one exon's sequence
+    files_in_progress = 0
+    print(f"\n \n \n \n Just run function: cutting_scrap")
+
+    for filename in os.listdir(path_to_file_after_MAFFT):
+        #print(f"\n Just tried make 1st turn - find all filenames, \n there is filename: {str(filename)}")
+        file = os.path.join(path_to_file_after_MAFFT, filename)
+        if not os.path.isfile(file):
+            continue
+        if file.endswith(".fasta"):
+            files_in_progress += 1
+            count_files = percentage_of_advancement(path_to_file_before_MAFFT)
+            print(f"\n ################################################################################### \n running file: {filename} which is {files_in_progress} of {count_files}, what means {round(files_in_progress/count_files*100, 2)}% of advancement \n ################################################################################### \n")
+            alignment = AlignIO.read(file, "fasta")
+            alignment_id = alignment[0].id
+            alignment_DIDNT_TOUCHED = AlignIO.read(file, "fasta")
+            #print(f"NA POCZATKU alignment: {alignment[0].id} ma dlugosc {len(alignment[0])}")
+
+        count_of_errors = 0
+
+
+        #Pawel mowil o mozliwosci stworzenia slownika w ktorym bylo przypisanie 
+        #sekwencja_z_pliku_przed_mafftem do sekwencja_z_pliku_po_maffcie. 
+        #Ja nie zrobilem slownika, a wydaje mi sie jeszcze krotsza droga:
+        file_before_MAFFT = os.path.join(path_to_file_before_MAFFT, filename)
+        if not os.path.isfile(file_before_MAFFT):
+            continue
+
+        
+        seq1_DT, seq2_DT = extracting_strands_from_alignment(alignment_DIDNT_TOUCHED) #type is Bio.Seq.Seq but works like a string
+        #dzialamy teraz nie na iterowanym alignmencie tylko na sekwencji ktora zachowuje sie jak string
+        
+        nucleotides = ["a", "t", "g", "c", "A", "T", "G", "C"]
+        index = 0
+
+        #EMPTY LIST TSV
+        id = []
+        exon_or_intron_number = []
+        is_it_intron = []
+        class_of_exon = []
+        percent_of_homology_for_exons = []
+        length = []
+        first_nt_position = []
+        last_nt_position = []
+        first_10_nt = []
+        last_10_nt = []
+        path = []
+        sequence = []
+
+        #EMPTY LIST GFF
+        seqid = [] #name of the chromosome or scaffold; chromosome names can be given with or without the 'chr' prefix. Important note: the seq ID must be one used within Ensembl, i.e. a standard chromosome name or an Ensembl identifier such as a scaffold ID, without any additional content such as species or assembly. See the example GFF output below.
+        source = [] #tutaj pominiemy ten krok - damy kropke #Describes the algorithm or the procedure that generated this feature. Typically Genescane or Genebank, respectively. #scaffold backbone trinity  i te numerki jakieś
+        typ = [] #Describes what the feature is (mRNA, domain, exon, etc.). #scaffold backbone trinity  i te numerki jakieś #intron lub exon
+        start = []
+        end = []
+        score = [] #Typically E-values for sequence similarity and P-values for predictions. Homology there
+        strand = []
+        phase = [] #Indicates where the feature begins with reference to the reading frame. The phase is one of the integers 0, 1, or 2, indicating the number of bases that should be removed from the beginning of this feature to reach the first base of the next codon.. Propably 0
+        attributes = [] #A semicolon-separated list of tag-value pairs, providing additional information about each feature. Some of these tags are predefined, e.g. ID, Name, Alias, Parent . You can see the full list [here](https://github.com/The-Sequence-Ontology/Specifications/blob/master/gff3.md).
+
+
+        seq1 = cleaning_gaps_from_both_edges(seq1_DT) #deleting gaps from 5' and 3'. It is important. The next function start counting from possible exon.
+        seq2 = cleaning_gaps_from_both_edges(seq2_DT)
+
+        # seq1 = seq1[:300] #ustalenia na potrzeby przejrzystosci dzialania na malych liczbach
+        # seq2 = seq2[:300]
+
+        #pomysl matematyczny
+        #iterujemy jednoczesnie po dwoch sekwencjach obiektach str. One zatracily swoj charakter .seq na wczesniejszej obrobce.
+        #mamy teraz dwie listy zawierajace pozycje wszystkich gapow i nie-gapow. Teraz:
+            #jesli roznica miedzy lista[i] a lista[i+1] > 2
+
+        #linking pre-exon's nucleotides (nt-nt pairs) and pre-intron's nucleotides (gap-nt pairs) to theirs indices 
+        temp_intron, temp_exon, count_of_errors = indices_of_introns_and_exons_fun(seq1_DT, seq2_DT, seq1, seq2, count_of_errors)
+        print(f"temp_introns indices: {temp_intron}")
+        print(f"temp_exon indices: {temp_exon}")
+
+
+        #linking indices into single strand of possible exons
+        exon_range_dict = start_and_end_parameters_of_exons_dict_fun(temp_exon, gaps_signs)
+        for key in exon_range_dict: #shows exon's sequences according to exon range dict
+            print(f"lista eksonow: {seq1[key:exon_range_dict[key]]}")
+
+        #linking indices into single strand of possible introns
+        intron_range_dict  = start_and_end_parameters_of_introns_dict_fun(exon_range_dict)
+        for key in intron_range_dict: #shows introns's sequences according to exon range dict
+            print(f"lista intronow: {seq1[key:intron_range_dict[key]]}")
+
+
+    #ALE BINGO PINKNE
+#NASTEPNIE ZROB ALIGNMENT tych eksonow
+#POROZDZIELAJ WYNIKI DO LIST W ZALEZNOSCI OD STOPNIA HOMOLOGII i dlugosci - czyli w skrocie, wszystko to co odrzucamy
+
+
+                
+                
+        
+
+        #####################################################################################################################
+        #########################################              NIEWYPAL              ########################################
+        ##########        NIE MOZEMY SKRACAC SEKWENCJI W TRAKCIE ITEROWANIA BO TO ZLE. SPROBUJ TERAZ INACZEJ       ##########
+        #####################################################################################################################
+        # all_exons = []
+        # good_exons = []
+        # introns = []
+        # def alignment_for_exon_fun(potencial_exon, seq1, seq2, min_length_aligned_sequence, extreme_homology, alignment_id):
+        #     print("\n alignment_for_exon_fun")
+        #     length_of_exon = len(potencial_exon)
+        #     if length_of_exon > 0:
+        #         aligner = Align.PairwiseAligner() #function making alignment
+        #         score = aligner.score(seq1[:length_of_exon], seq2[:length_of_exon])
+        #         target = seq1[:length_of_exon]
+        #         print(f"target: {target}")
+        #         query = seq2[:length_of_exon]
+        #         print(f"query: {query}")
+        #         alignment_seqs = aligner.align(target, query)
+        #         print(f"Alignment : \n{alignment_seqs[0]}")
+        #         if score == 0:
+        #             print(f"Alignment_for_exon_fun deleted. Score of alignment = {score}")
+        #             return score, length_of_exon
+        #         print(f"Alignment score of {alignment_id} = {score}")
+        #         return score, length_of_exon
+        #     else: 
+        #         print(f"Alignment_for_exon_fun broken. Length of exon = {length_of_exon} ")
+        #         score = 0 #dont do alignment if sequencion is too short 
+        #         return score, length_of_exon
+            
+        # def detecting_first_exon_fun(all_exons, good_exons, introns, seq1, seq2, gaps_signs, min_length_aligned_sequence, extreme_homology, acceptable_gap_length, alignment_id):
+        #     print("\n Poczatek detecting_first_exon")
+        #     #two_first_positions = seq1[:acceptable_gap_length]
+        #     # print("two first positions: ",two_first_positions)
+        #     while seq1:
+        #         print("first while")
+        #         if seq1[:acceptable_gap_length] == gaps_signs:
+        #             print("there were gaps")
+        #             seq1 = seq1[1:]
+        #             seq2 = seq2[1:]
+        #             print(seq1[:50])
+        #             # two_first_positions = seq1[:acceptable_gap_length]
+
+        #         else:
+        #             potencial_exon = ""
+        #             while seq1 and seq1[0] != "-":
+        #                 print("second while")
+        #                 potencial_exon += seq1[0]
+        #                 #
+        #                 seq1 = seq1[1:]
+        #                 seq2 = seq2[1:] #tu by sie przydala stara sekwencja
+        #                 print(potencial_exon)
+                        
+        #             alignment_score, length_of_exon = alignment_for_exon_fun(potencial_exon, seq1, seq2, min_length_aligned_sequence, extreme_homology, alignment_id)
+        #             #W tym momencie pojawia sie blad. Importuje do funkcji wyzej zmienna: dlugosc potencial_exon. Na jej podstawie
+        #             #wykonuje alignment od poczatku sekwencji do n-tego nukleotydu. 
+        #             #niestety ta sekwencja jest ucieta i nie zawiera juz tego egzonu.
+        #             #proponuje rozwiazanie o usuwani eksonu dopiero po tym jak zrobimy dla niego alignment. Do tego przyda sie stara
+        #             #funkcja - do obliczania dystansu miedzy przerwa. 
+        #             #albo zrobimy inaczej. 
+        #             print(potencial_exon)
+    
+
+        #             if length_of_exon < min_length_aligned_sequence and alignment_score < extreme_homology:
+        #                 all_exons.append(potencial_exon)
+        #                 print("one list was appended")
+                        
+        #             else:
+        #                 print("both lists were appended")
+        #                 all_exons.append(potencial_exon)
+        #                 good_exons.append(potencial_exon)
+        #             two_first_positions = seq1[:acceptable_gap_length]
+        #         print(potencial_exon)
+
+        #     print("Koniec detecting_first_exon \n")
+        #     return all_exons, good_exons
+
+             
+            
+        # list1, list2 = detecting_first_exon_fun(all_exons, good_exons, introns, seq1, seq2, gaps_signs, min_length_aligned_sequence, extreme_homology, acceptable_gap_length, alignment_id)
+        # print(list1, list2)
+
+#########################################################################################################################
+        # for nts in range(len(seq2[:100])):
+        #     first_nucleotides_pair = seq1[0]
+        #     if "-" in first_nucleotides_pair:
+        #         seq1 = seq1[1:]
+        #         seq2 = seq2[1:]
+        #     else:
+        #         potencial_exons_temporary += str(first_nucleotides_pair)
+        #         print(potencial_exons_temporary)
+        #         #tutaj zrob ten alignment z sekwencja druga
+        #         #local_alignment = pairwise2.align.localxx(seq1[:distance_between_first_nt_and_gap], seq2[:distance_between_first_nt_and_gap], one_alignment_only = True)
+        #         seq1 = seq1[1:]
+        #         seq2 = seq2[1:]
+
+        
+        # print(potencial_exons_at_edges_temporary)
+        # print(len(potencial_exons_at_edges_temporary))
+                #if "-" in 
+            #teraz scal wszystkie pozycje tej listy w jeden ciag stringow ALE W OBIEKCIE SEQ
+            #potem warunek jesli bedzie wiecej niz 30 nt jeden po drugim w gornym strandzie to badaj alignment
+            #jesli alignment ma odpowiednia homologie to wysylaj tego egzona do nowej listy.
+            #przerwij funkcje
+            #napisz to samo od tylu            
+
+
+
+
+        
+                
+        # print(craps__gaps_and_nucleotides_at_edges_temporary)
+        # print(potencial_exons_at_edges_temporary)
+        # print(f"dlugosc listy craps__gaps_and_nucleotides_at_edges_temporary by sprawdzic czy suma rowna sie dlugosci alignmentu: {len(craps__gaps_and_nucleotides_at_edges_temporary)}")
+        # print(f"dlugosc listy potencial_exons_at_edges_temporary by sprawdzic czy suma rowna sie dlugosci alignmentu: {len(potencial_exons_at_edges_temporary)}")
+
+'''
+        tymczasowy_krotki_alignment_roboczy = alignment[:, :50]
+        print(f"Sekwencja referencyjna ma dlugosc: {len(tymczasowy_krotki_alignment_roboczy[1])}")
+        craps__gaps_and_potencial_exons_temporary = []
+        potencial_exons_at_edges_temporary = []
+        for nts in range(len(tymczasowy_krotki_alignment_roboczy[1])):
+            first_nucleotides_pair = tymczasowy_krotki_alignment_roboczy[:, 0]
+            craps__gaps_and_potencial_exons_temporary.append(first_nucleotides_pair)
+            restored_alignment = "".join(craps__gaps_and_potencial_exons_temporary)
+            print(restored_alignment)
+'''
+
+        
+#############################################################################################################################
+#######################################                       STARE                   #######################################       
+#############################################################################################################################
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#############################################################################################################################
+#######################################                       NOWE                    #######################################       
+#############################################################################################################################
+
+'''
+#PLAN JEST TAKI:
+
+ROBIMY TABELKE Z D
+niech program iteruje po alignmencie
+USUWAMY WSZELKIE GAPY NA POCZATKU
+jesli znajdize "-" to niech zapisuje do slownika intronow na wzor: organism_id : sequence, pozycja_w_odniesieniu_do_sekwencji_wyjsciowej (po tym poskladamy nasze introny i eksony w jedna tabelke)
+jesli znajdzie dwa sparowane nukleotydy to dodaje je do tymczasowej listy
+dodawanie zakonczy sie gdy pojawia sie dwa gapy 
+
+1. ucinamy gapy na początku i końcu, tak by alignment zaczynał i kończył się od eksonu
+    i tak musimy stworzyc tutaj listy tymczasowe gdzie bedziemy dorzucali pary a nastepnie sprawdzali czy sa one eksonem czy jeszcze nie
+2. iterujemy po parze nukleotydów i dodajemy je do listy tymczasowej list_temp
+    - jeśli na dwóch ostatnich pozycjach są gapy (nasz warunek z zewnątrz) oraz na poprzednich pozycjach są nukleotydy to usuwamy te dwa ostatnie gapy, tak by pozostał czysty ekson. Dalej sprawdzamy mu długość a następnie robimy alignment. Potem w zależności od jakości wysyłamy go do listy z dobrą jakością lub złą jakością (o tym rozmawialiśmy na ostatnim spotkaniu)
+    - jeśli na dwóch ostatnich pozycjach są gapy, ale brakuje nukleotydów to dodajemy ten dwuelementowy "mini - intron" do listy tymczasowej list_temp_intron tak długo aż pojawi się nukleotyd. Ten intron wysyłamy do głownej listy z intronami.
+3. Po zakończeniu, składamy dobre eksony z intronami. Złożę je chronologicznie, bo do poprzednich list dodam ich index, by wiedzieć który to z kolei nukleotyd
+
+
+'''
+
+
+
+
+
+
+
+
+
+
+
+
+
+#############################################################################################################################
+#######################################                     FUNKCJE                   #######################################       
+#############################################################################################################################
+
+def indices_of_introns_and_exons_fun(seq1_DT, seq2_DT, seq1, seq2, count_of_errors):
+    #linking pre-exon's nucleotides (nt-nt pairs) and pre-intron's nucleotides (gap-nt pairs) to theirs indices 
+    temp_exon = [] #list containing indices of intron's positions in sequence.
+    temp_intron = [] #list containing indices of intron's positions in sequence.
+    index = -1
+    paired_nucleotides = zip(seq1, seq2)
+    
+    if len(seq1_DT) != len(seq2_DT):
+        raise ValueError("The two sequences must be of the same length.")
+        count_of_errors += 1
+        #return count_of_errors
+    for nt1, nt2 in paired_nucleotides:
+        index += 1 #indeks do wskazywania pozycji w sekwencji 
+        #print(index)
+        if "-" in (nt1, nt2):
+            temp_intron.append(index)
+        else:
+            temp_exon.append(index)
+    return temp_intron, temp_exon, count_of_errors
+
+
+def start_and_end_parameters_of_exons_dict_fun(temp_exon, gaps_signs):
+    #linking indices into single strand of possible exons
+    start_exon = temp_exon[0]
+    exon_range_dict = {} #that dictionary contains: key(index of start exon) and value(index of end exon)
+    for i in range(len(temp_exon)):
+        #print(start_exon)
+        if (temp_exon[i] - temp_exon[i-1]) > len(gaps_signs): #if difference between two indices of exons's positions is bigger than given number (2), that smaller number is index of 3' nucleotide in exon 
+            end_exon = temp_exon[i-1] #temp_exon[i-1] because it is index in list temp_exon. +1 because python starts counting from 0
+            exon_range_dict[start_exon] = end_exon #creating dictionary with 
+            start_exon = temp_exon[i]
+    print(f" \n exon_range_dict: {exon_range_dict}")
+    return (exon_range_dict)
+     
+def start_and_end_parameters_of_introns_dict_fun(exon_range_dict):
+    #linking indices into single strand of possible introns
+    intron_range_dict = {}
+    keys_from_exon_range_dict = sorted(exon_range_dict.keys()) #list that contains exons's start positions
+    print(keys_from_exon_range_dict)
+
+    for i in range(len(keys_from_exon_range_dict) - 1):
+        start_intron = exon_range_dict[keys_from_exon_range_dict[i]] +1 
+        end_intron = keys_from_exon_range_dict[i + 1] - 1
+        intron_range_dict[start_intron] = end_intron
+    print(intron_range_dict)
+    return (intron_range_dict)
+
+
+#nowe
+#################################
+#stare
+
+def percentage_of_advancement(directory):
+    count = 0
+    for file in os.listdir(directory):
+        if file.endswith(".fasta"):
+            count += 1
+    return(count)
+
+
+def extracting_strands_from_alignment(alignment): #that function describe what strand is transcript strand and genomic strand - in our files, transcript strand has longer ID.
+    #print(f"Alignment: {alignment[0].id}, funkcja: extracting_strands_from_alignment, przeszlo")
+    if len(alignment[0].id) >= len(alignment[1].id):
+        seq1 = alignment[0].seq
+        seq2 = alignment[1].seq
+        #seq1_is_transcript = True #obecnie nie uzywane
+    else:
+        seq1 = alignment[1].seq
+        seq2 = alignment[0].seq    
+        #seq1_is_transcript = False #obecnie nie uzywane
+    #print(f"\n Just run function: extracting_strands_from_alignment")
+    return seq1, seq2
+    #return seq1_is_transcript #obecnie nie uzywane
+    
+
+def finding_gap_index(sequence, acceptable_gap_length, alignment): #finding index of first gap in each sequence
+    #print(f"Alignment: {alignment[0].id}, funkcja: finding_gap_index, przeszlo")
+    gap_index = sequence.find("-" * acceptable_gap_length) #-1 is output when anything was found
+    #print(type(gap_index))
+    return gap_index
+
+
+def reversed_finding_gap_index(sequence, acceptable_gap_length, alignment): #finding index of first gap in each sequence for counting the end of intron
+    #print(f"Alignment: {alignment[0].id}, funkcja: reversed_finding_gap_index, przeszlo")
+    return sequence.rfind("-" * acceptable_gap_length) + acceptable_gap_length #now we have to add length of gap to index, because python starts counting from 0 nt, and we just change direction of counting.
+
+def setting_distance_between_first_nt_and_gap(is_it_exon, first_gap_position_seq1, first_gap_position_seq2, last_gap_position_seq1, last_gap_position_seq2, seq1, alignment): #it means lenght of exon
+    #print(f"Alignment: {alignment[0].id}, funkcja: setting_distance_between_first_nt_and_gap, przeszlo")
+    if is_it_exon == True:
+        if first_gap_position_seq2 < 0: #when in second strand there are no gaps - it means, second strand is correctly prepared. <0 because find() function gives -1 result when not find
+            distance_between_first_nt_and_gap = first_gap_position_seq1 #more important is seq2 because it is genomic sequence, ~reference sequence
+        elif first_gap_position_seq1 < 0:
+            distance_between_first_nt_and_gap = first_gap_position_seq2
+        else:
+            distance_between_first_nt_and_gap = min(first_gap_position_seq1, first_gap_position_seq2)
+        return distance_between_first_nt_and_gap
+
+    elif is_it_exon == False:
+        if last_gap_position_seq2 < 0: #it means, if there is no gaps in second sequention, gap position is gap position in seq1. Additional, rfind() function return "-1" if it won't find any gaps in seq
+            distance_between_first_nt_and_gap = (len(seq1) - last_gap_position_seq1) -1
+            #print("pierwszy", distance_between_first_nt_and_gap) #checkpoint
+        else:
+            distance_between_first_nt_and_gap = (len(seq1) - max(last_gap_position_seq1, last_gap_position_seq2))
+        return distance_between_first_nt_and_gap
+            #print("drugi", distance_between_first_nt_and_gap) #checkpoint
+
+        
+def describing_class_of_exon(percent_of_homology, last_nt_exon_index, min_length_aligned_sequence, class_of_exon): #class of exon depends of their homology
+    #print(f"Alignment: {alignment[0].id}, funkcja: describing_class_of_exon, przeszlo")
+    if percent_of_homology >= 0.9 and last_nt_exon_index >= min_length_aligned_sequence:
+        class_of_exon.append("1")
+    elif percent_of_homology < 0.9 and percent_of_homology > 0 and last_nt_exon_index < min_length_aligned_sequence:
+        class_of_exon.append("2")
+    else:
+        class_of_exon.append("3")
+
+
+def exons_indices(is_it_exon, max_genomic_seq, seq2, last_nt_exon_index, first_nt_position, last_nt_position):
+    #print(f"Alignment: {alignment[0].id}, funkcja: exons_indices, przeszlo")
+    if is_it_exon:
+        first_nt_index_of_exon = max_genomic_seq.find(str(seq2[:last_nt_exon_index]).replace("-", ""))
+        if first_nt_index_of_exon == -1:
+            first_nt_position.append(0)
+            last_nt_position.append(0)
+            #print(f"That exon: {seq2[:last_nt_exon_index].replace('-', '')} comes from genomic sequence and cannot be found in file_before_MAFFT.")
+        else:
+            first_nt_position.append(first_nt_index_of_exon + 1)
+            last_nt_position.append(first_nt_index_of_exon + len(seq2[:last_nt_exon_index]))
+            
+
+def introns_indices(is_it_exon, max_genomic_seq, seq2, last_nt_intron_index, first_nt_position, last_nt_position):
+    #print(f"Alignment: {alignment[0].id}, funkcja: introns_indices, przeszlo")
+    if is_it_exon: 
+        first_nt_index_of_intron = max_genomic_seq.find(str(seq2[:last_nt_intron_index]))
+        if first_nt_index_of_intron == -1:
+            first_nt_position.append(0)
+            last_nt_position.append(0)
+        else:
+            first_nt_position.append(first_nt_index_of_intron + 1)
+            last_nt_position.append(first_nt_index_of_intron + len(seq2[:last_nt_intron_index]))
+
+
+def extending_source_data_frame(alignment, source):
+    #print(f"Alignment: {alignment[0].id}, funkcja: extending_source_data_frame, przeszlo")
+    keywords = ["TRINITY", "BACKBONE", "SCAFFOLD"]
+    found = False
+    for key in keywords:
+        if str(alignment[0]).lower().find(key.lower()) != -1:
+            source.append(key)
+            found = True
+            break
+    if not found:
+        source.append(None) #none means unknown
+
+
+def extending_strand_data_frame(alignment, strand): 
+    #print(f"Alignment: {alignment[0].id}, funkcja: extending_strand_data_frame, przeszlo")
+    if str(alignment[0]).find("SL+") != -1:
+        strand.append("+")
+    elif str(alignment[0]).find("SL-") != -1:
+        strand.append("-")
+    else:
+        strand.append(None)
+
+
+def extending_start_and_end_data_frame_exons(seq2, seq2_DT, start, end, distance_between_first_nt_and_gap, last_nt_exon_index): #index of exons's start
+    #print(f"Alignment: {alignment[0].id}, funkcja: extending_start_and_end_data_frame, przeszlo")
+    #print(f"Alignment:, funkcja: extending_start_and_end_data_frame, przeszlo")
+    start.append(seq2_DT.find(seq2[:distance_between_first_nt_and_gap])+1) #+1 because python starts counting from 0, not 1
+    end.append(seq2_DT.find(seq2[:distance_between_first_nt_and_gap]) + last_nt_exon_index)
+
+def extending_start_and_end_data_frame_introns(seq2, seq2_DT, start, end, distance_between_first_nt_and_gap, last_nt_intron_index): #index of intron's start
+    #print(f"Alignment: {alignment[0].id}, funkcja: extending_start_and_end_data_frame, przeszlo")
+    #print(f"Alignment:, funkcja: extending_start_and_end_data_frame, przeszlo")
+    start.append(seq2_DT.find(seq2[:distance_between_first_nt_and_gap])+1)
+    end.append(seq2_DT.find(seq2[:distance_between_first_nt_and_gap]) + last_nt_intron_index)
+
+def save_to_file(final_data_frame, filename):
+    #print(f"Alignment: {alignment[0].id}, funkcja: save_to_file, przeszlo")
+    if os.path.isfile(filename):
+        user_input = input("TSV file already exists. Do you want overwrite? y/n: ")
+        if user_input == "n":
+            base_name, ext = os.path.splitext(filename)
+            i = 1
+            while os.path.isfile(f"{base_name}_{i}{ext}"):
+                i += 1
+            filename = f"{base_name}_{i}{ext}"
+            final_data_frame.to_csv(filename, sep = "\t")
+            
+        elif user_input == "y":
+            final_data_frame.to_csv(filename, sep = "\t")
+        else:
+            print("Clarify your answer. Nothing has done.")
+            
+    else:
+        final_data_frame.to_csv(filename, sep = "\t")
+
+def save_to_gff_file(gff_final_data_frame, filename):
+    #print(f"Alignment: {alignment[0].id}, funkcja: save_to_gff_file, przeszlo")
+    if os.path.isfile(filename):
+        user_input = input("GFF file already exists. Do you want overwrite? y/n: ")
+        if user_input == "n":
+            base_name, ext = os.path.splitext(filename)
+            i = 1
+            while os.path.isfile(f"{base_name}_{i}{ext}"):
+                i += 1
+            filename = f"{base_name}_{i}{ext}"
+            gff_final_data_frame.to_csv(filename, sep = "\t")
+            
+        elif user_input == "y":
+            gff_final_data_frame.to_csv(filename, sep = "\t")
+        else:
+            print("Clarify your answer. Nothing has done.")
+            
+    else:
+        gff_final_data_frame.to_csv(filename, sep = "\t")
+
+def check_alignment_eligibility(alignment, alignment_DIDNT_TOUCHED, acceptable_gap_length, files_in_progress, count_files, count_of_errors, filename, extreme_homology, min_length_aligned_sequence):
+    while True:
+        is_it_exon = True
+        first_nucleotides_pair = alignment[:, 0]#first nucleotides in both strands as variable
+        if "-" in first_nucleotides_pair: #deleting mismatches at the start
+            if len(alignment[0]) < 100: #zakoczenie przycinania - nie wiem czy to jest to o co mi chodzilo
+                break
+            else:
+                alignment = alignment[:, 1:]
+                #print(f"alignment after cut:\n{alignment}") #chekpoint
+                if len(alignment[0]) % 10 == 0:
+                    # print(f"{round((100-(len(alignment[0])/len(alignment_DIDNT_TOUCHED[0]))*100), 2)}% base pair done of {alignment[0].id}. {files_in_progress} of {count_files}, what means {round(files_in_progress/count_files*100, 2)}% of advancement. The time is: {time.strftime('%H:%M:%S', time.localtime())}")
+                    # print(f"First 50 nt of reference sequence is: {(alignment[1].seq)[:50]}. \n")
+                    function_progress(alignment, alignment_DIDNT_TOUCHED, files_in_progress, count_files)
+            continue
+    
+                
+        seq1, seq2 = extracting_strands_from_alignment(alignment)
+        seq1_DT, seq2_DT = extracting_strands_from_alignment(alignment_DIDNT_TOUCHED) #sequences without cutted gaps from the ends. They will be used to count index where intron starts
+        
+    
+        first_gap_position_seq1 = finding_gap_index(seq1, acceptable_gap_length, alignment)
+        first_gap_position_seq2 = finding_gap_index(seq2, acceptable_gap_length, alignment)
+        last_gap_position_seq1 = reversed_finding_gap_index(seq1, acceptable_gap_length, alignment)
+        last_gap_position_seq2 = reversed_finding_gap_index(seq2, acceptable_gap_length, alignment)
+        #print(f"first gap position in first sequence:{first_gap_position_seq1}, in 2nd sequence: {first_gap_position_seq2}") #checkpoint
+    
+        distance_between_first_nt_and_gap = setting_distance_between_first_nt_and_gap(is_it_exon, first_gap_position_seq1, first_gap_position_seq2, last_gap_position_seq1, last_gap_position_seq2, seq1, alignment)
+        
+        local_alignment = pairwise2.align.localxx(seq1[:distance_between_first_nt_and_gap], seq2[:distance_between_first_nt_and_gap], one_alignment_only = True) #"xx"  means no gap penalty while opening gaps or longering them and no penalties for mismatch. Just pure score of alignment to count homology
+        print("local_alignment:", local_alignment) #checkpoint
+    
+        try:  #instruction what to do when seq is too short
+            local_homology_percentage = (local_alignment[0].score / distance_between_first_nt_and_gap) 
+        except IndexError:
+            if len(seq1) < 100:
+                count_of_errors += 1
+                print(f"That file {filename} made {count_of_errors}th error")
+                #print(f"\n \n {alignment[0].id} sequence is too short, sequence has not exons or other fault. \n")
+                break
+            continue
+
+        
+        local_homology_percentage = (local_alignment[0].score / distance_between_first_nt_and_gap)
+        print(local_homology_percentage)
+
+    
+        if local_homology_percentage <= extreme_homology:
+            print(f" Too low score of homology. \n alignment: {alignment[:, :50]} \n score: {local_alignment[0].score}, distance: {distance_between_first_nt_and_gap}, percent: {round(local_homology_percentage, 2)*100}%, \n {local_alignment} \n \n \n \n \n")
+            alignment = alignment[:, distance_between_first_nt_and_gap:]
+            function_progress(alignment, alignment_DIDNT_TOUCHED, files_in_progress, count_files)            
+        else:
+            if distance_between_first_nt_and_gap <= min_length_aligned_sequence:
+                #print(f"\n alignment is too short. \n distance between sequences {distance_between_first_nt_and_gap}, \n alignment: {alignment}, \n score: {local_alignment[0].score}, distance: {distance_between_first_nt_and_gap}, procentowo: {round(local_homology_percentage, 2)*100}%, \n {local_alignment}")
+                alignment = alignment[:, distance_between_first_nt_and_gap:]
+                function_progress(alignment, alignment_DIDNT_TOUCHED, files_in_progress, count_files)
+            else:
+                #print(f"Sequence {alignment[0].id} cut properly from LEFT side, \n distance between sequences: {distance_between_first_nt_and_gap}"), alignment: {alignment[:, :50]},
+                break
+                
+        if len(seq1) < 100 or len(seq2) < 100:
+            break
+
+        return seq1, seq2, seq1_DT, seq2_DT, first_gap_position_seq1, first_gap_position_seq2, last_gap_position_seq1, last_gap_position_seq2, distance_between_first_nt_and_gap, local_alignment, local_homology_percentage
+
+    ######################### TERAZ OD PRAWEJ DO LEWEJ #######################
+    
+    while True:
+            
+        is_it_exon = False
+        last_nucleotides_pair = alignment[:, -1]#last nucleotides in both strands as variable
+
+    
+        if "-" in last_nucleotides_pair: #deleting mismatches at the end
+            if len(alignment[0]) < 100 or len(alignment[1]) < 100:
+                #print("alignment has no matching nucleotides")
+                break 
+            else:
+                alignment = alignment[:, :-1]
+                function_progress(alignment, alignment_DIDNT_TOUCHED, files_in_progress, count_files)
+                #print(f"alignment check:\n{alignment[:, -50:-1]}") checkpoint
+            continue
+        else:
+            if len(alignment[0]) < 100 or len(alignment[1]) < 0:
+                #print("counting from right side: alignment is too short")
+                break
+        
+    
+        seq1, seq2 = extracting_strands_from_alignment(alignment)
+        seq1_DT, seq2_DT = extracting_strands_from_alignment(alignment_DIDNT_TOUCHED) #sequences without cutted gaps from the ends. They will be used to count index where intron starts
+        
+
+        first_gap_position_seq1 = finding_gap_index(seq1, acceptable_gap_length, alignment)
+        first_gap_position_seq2 = finding_gap_index(seq2, acceptable_gap_length, alignment)
+        last_gap_position_seq1 = reversed_finding_gap_index(seq1, acceptable_gap_length, alignment)
+        last_gap_position_seq2 = reversed_finding_gap_index(seq2, acceptable_gap_length, alignment)
+        #print("seq1:", last_gap_position_seq1, "seq2:", last_gap_position_seq2) #checkpoint
+        
+        distance_between_first_nt_and_gap = setting_distance_between_first_nt_and_gap(is_it_exon, first_gap_position_seq1, first_gap_position_seq2, last_gap_position_seq1, last_gap_position_seq2, seq1, alignment)
+        #print("drugi", distance_between_first_nt_and_gap)
+                
+        local_alignment = pairwise2.align.localxx(seq1[-distance_between_first_nt_and_gap:], seq2[-distance_between_first_nt_and_gap:], one_alignment_only = True) #"xx" means no gap penalty while opening gaps or longering them and no penalties for mismatch. Just pure score of alignment
+        #print("local_alignment:", local_alignment) #checkpoint
+                
+    
+        try:#instruction what to do when seq is too short or gaps were not found
+            if distance_between_first_nt_and_gap != 0:
+                local_homology_percentage = (local_alignment[0].score / distance_between_first_nt_and_gap) 
+            else:
+                break
+        except IndexError:
+            if len(seq1) < 100:
+                count_of_errors += 1
+                print(f"That file {filename} made {count_of_errors}th error")
+                #print(f"\n \n {alignment[0].id} sequence is too short or sequence has not exons. \n")
+                break
+            continue
+    
+        
+        if local_homology_percentage <= extreme_homology:
+            #print(f"\n Too low homology! \n alignment: {alignment[:, -50:]} \n score: {local_alignment[0].score}, \distance: {distance_between_first_nt_and_gap}, %%%: {round(local_homology_percentage, 2)*100}%, \n {local_alignment}")
+            alignment = alignment[:, :-distance_between_first_nt_and_gap] 
+            function_progress(alignment, alignment_DIDNT_TOUCHED, files_in_progress, count_files)
+            
+        else:
+            if distance_between_first_nt_and_gap <= min_length_aligned_sequence:
+                #print(f"\n Alignment is too short!. \n distance: {distance_between_first_nt_and_gap}, \n alignment: {alignment}, \n score: {local_alignment[0].score}, distance: {distance_between_first_nt_and_gap}, %%%: {round(local_homology_percentage, 2)*100}%, \n {local_alignment}")
+                alignment = alignment[:, :-distance_between_first_nt_and_gap]
+                function_progress(alignment, alignment_DIDNT_TOUCHED, files_in_progress, count_files)
+            else:
+                #print(f"Sequence: {alignment[0].id} cut properly from RIGHT side, alignment: \n {alignment[:, -50:]}")
+                break
+                
+        return seq1, seq2, seq1_DT, seq2_DT, first_gap_position_seq1, first_gap_position_seq2, last_gap_position_seq1, last_gap_position_seq2, distance_between_first_nt_and_gap, local_alignment, local_homology_percentage
+
+        if len(seq1) < 100 or len(seq2) < 100:
+            break
+
+def function_progress(alignment, alignment_DIDNT_TOUCHED, files_in_progress, count_files):
+    #do tego tematu wrocimy jak zrobimy tabele z odrzuconymi wartosciami
+    first_50_nt_alignment = str((alignment[1].seq)[:20])
+    #print(f" {round((100-(len(alignment[0])\/len(alignment_DIDNT_TOUCHED[0]))*100), 2)}% % base pair done of {alignment[0].id}. {files_in_progress} of {count_files}, what means {round(files_in_progress/count_files*100, 2)}% of advancement. The time is: {time.strftime('%H:%M:%S', time.localtime())}")
+
+def cleaning_gaps_from_both_edges(sequence):
+    return sequence.lstrip("-").rstrip("-")
+if __name__ == '__main__':
+    cutting_scrap(path_to_file_before_MAFFT, path_to_file_after_MAFFT, 2)
