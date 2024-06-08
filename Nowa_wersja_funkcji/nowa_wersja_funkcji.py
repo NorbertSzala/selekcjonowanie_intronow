@@ -52,82 +52,83 @@ def cutting_scrap(path_to_file_before_MAFFT, path_to_file_after_MAFFT, acceptabl
         if not os.path.isfile(file):
             continue
         if file.endswith(".fasta"):
-            files_in_progress += 1
-            count_files = percentage_of_advancement(path_to_file_before_MAFFT)
-            # print(f"\n ################################################################################### \n running file: {filename} which is {files_in_progress} of {count_files}, what means {round(files_in_progress/count_files*100, 2)}% of advancement \n ################################################################################### \n")
-            alignment = AlignIO.read(file, "fasta")
-            alignment_id = alignment[0].id
-            alignment_DIDNT_TOUCHED = AlignIO.read(file, "fasta")
-
-
-        file_before_MAFFT = os.path.join(path_to_file_before_MAFFT, filename)
-        if not os.path.isfile(file_before_MAFFT):
-            continue
-
-
-        # extracting_strands_from_alignment function is used to determine which strand is genomic strand or transcript
-        seq1_DT, seq2_DT = extracting_strands_from_alignment(alignment_DIDNT_TOUCHED)
-
-        # Removing gaps from 5' and 3'. Then pre-exon (candidat to be exon) will be first
-        try:
-            seq1, seq2, count_deleted_gaps_left = cleaning_gaps_from_both_edges(seq1_DT, seq2_DT, alignment, filename) #deleting gaps from 5' and 3'. It is important. The next function start counting from possible exon.
-        except ValueError as e:
-            print(e)
-            broken_files.append(filename)
-
-
-        # Creating list with nucleotides's positions of intron or exon
-        try:
-            temp_intron, temp_exon = indices_of_introns_and_exons_fun(seq1_DT, seq2_DT, seq1, seq2, count_deleted_gaps_left)
-        except ValueError as e:
-            print(e)
-            broken_files.append(filename)
-
+            try:
+                files_in_progress += 1
+                count_files = percentage_of_advancement(path_to_file_before_MAFFT)
+                print(f"\n ################################################################################### \n running file: {filename} which is {files_in_progress} of {count_files}, what means {round(files_in_progress/count_files*100, 2)}% of advancement \n ################################################################################### \n")
+                alignment = AlignIO.read(file, "fasta")
+                alignment_id = alignment[0].id
+                alignment_DIDNT_TOUCHED = AlignIO.read(file, "fasta")
+    
+    
+                file_before_MAFFT = os.path.join(path_to_file_before_MAFFT, filename)
+                if not os.path.isfile(file_before_MAFFT):
+                    continue
         
-        # Creating dictionary like: start_exon:end_exon. If distance between two following indices is bigger than two (acceptable gap length) then there is intron between them.
-        all_exon_range_dict = start_and_end_parameters_of_exons_dict_fun(temp_exon, gaps_signs)
-
-
-        # Making alignment and determinig class of exon according to their homology.
-        # Forming a table with exons
-        try:
-            exon_rows_to_concete_table, one_alignment_df = making_exons_gff_table_fun(all_exon_range_dict, min_length_aligned_sequence, extreme_homology, seq1_DT, seq2_DT, alignment_id, column_names, filename[:-6])
-        except ValueError as e:
-            print(e)
-            broken_files.append(filename)
-
+                # extracting_strands_from_alignment function is used to determine which strand is genomic strand or transcript
+                seq1_DT, seq2_DT = extracting_strands_from_alignment(alignment_DIDNT_TOUCHED)
+                seq1, seq2 = extracting_strands_from_alignment(alignment)
+    
+                # Removing gaps from 5' and 3'. Then pre-exon (candidat to be exon) will be first
+                seq1, seq2, count_deleted_gaps_left = cleaning_gaps_from_both_edges(seq1_DT, seq2_DT, alignment, filename) #deleting gaps from 5' and 3'. It is important. The next function start counting from possible exon.
         
-        gff_data_frames.append(one_alignment_df)
+                # Creating list with nucleotides's positions of intron or exon
+                temp_intron, temp_exon = indices_of_introns_and_exons_fun(seq1_DT, seq2_DT, seq1, seq2, count_deleted_gaps_left)
+                
+                # Creating dictionary like: start_exon:end_exon. If distance between two following indices is bigger than two (acceptable gap length) then there is intron between them.
+                all_exon_range_dict = start_and_end_parameters_of_exons_dict_fun(temp_exon, gaps_signs)
+        
+        
+                # Making alignment and determinig class of exon according to their homology.
+                # Forming a table with exons
+                exon_rows_to_concete_table, one_alignment_df = making_exons_gff_table_fun(all_exon_range_dict, min_length_aligned_sequence, extreme_homology, seq1_DT, seq2_DT, alignment_id, column_names, filename[:-6])
+                print(one_alignment_df)
 
-
+                if one_alignment_df.empty:
+                    print(f'File: {filename} is out of exons and introns. Processing failed. Broken_file list appended.')
+                    broken_files.append(filename)
+                else:
+                    gff_data_frames.append(one_alignment_df)
+            
+            except Exception as e:
+                print(f"Error processing file {filename}: {e}")
+                broken_files.append(filename)
+        
+    
     # spliting a data frame to 3 others, with different exon's class
-    all_exons_df = pd.concat(gff_data_frames, ignore_index = True)
-    TLH_exons_df = all_exons_df[all_exons_df['exon_type'] == 'TLH'].copy()
-    fine_exons_df = all_exons_df[all_exons_df['exon_type'] == 'fine'].copy()
+    if not len(gff_data_frames) == 0:
+        all_exons_df = pd.concat(gff_data_frames, ignore_index = True)
+        TLH_exons_df = all_exons_df[all_exons_df['exon_type'] == 'TLH'].copy()
+        fine_exons_df = all_exons_df[all_exons_df['exon_type'] == 'fine'].copy()
 
-    
-    # Adding introns to tables
-    all_exons_df, TLH_exons_df, fine_exons_df = adding_introns_to_gff_data_frame(all_exons_df, TLH_exons_df, fine_exons_df, column_names)
-
+        all_exons_df, TLH_exons_df, fine_exons_df = adding_introns_to_gff_data_frame(all_exons_df, TLH_exons_df, fine_exons_df, column_names)
   
-    print(f'{((total_files - len(broken_files)) / total_files) * 100 }% of files end up succesfully. {len(broken_files)} had error. List of files with errors in broken_files file.')
-    
-    fine_exons_count = fine_exons_df['exon_type'].str.contains('fine', case = False).sum()
-    return fine_exons_count
-    
+        print(f'{((total_files - len(broken_files)) / total_files) * 100 }% of files end up succesfully. {len(broken_files)} had error. List of files with errors in broken_files file.')
+        fine_exons_count = fine_exons_df['exon_type'].str.contains('fine', case = False).sum()
+        print(fine_exons_df)
+    else:
+        print("No valid data frames to concatenate.")
+        all_exons_df = pd.DataFrame(columns=column_names)
+        TLH_exons_df = pd.DataFrame(columns=column_names)
+        fine_exons_df = pd.DataFrame(columns=column_names)
+        fine_exons_count = 0        
+        
+    # Adding introns to tables
+
     # Saving table in tsv gff format
-    # save_to_gff_file(all_exons_df, 'all_exons_gff.tsv')
-    # save_to_gff_file(TLH_exons_df, 'TLH_exons_gff.tsv')
-    # save_to_gff_file(fine_exons_df, 'fine_exons_gff.tsv')
-    
+    save_to_gff_file(all_exons_df, 'broken_all_exons_gff.tsv')
+    save_to_gff_file(TLH_exons_df, 'broken_TLH_exons_gff.tsv')
+    save_to_gff_file(fine_exons_df, 'broken_fine_exons_gff.tsv')
+    print(len(broken_files))
     with open('broken_files', 'w') as file:
         file.write('lista plikow ktora nie przeszla programu \n ')
         file.write(str(broken_files))
+    return fine_exons_count
 
                    
 
 #############################################################################################################################
-#######################################                     FUNKCJE                   #######################################       
+#######################################                MINOR FUNCTIONS                #######################################       
 #############################################################################################################################
 
 def percentage_of_advancement(directory):
@@ -139,15 +140,23 @@ def percentage_of_advancement(directory):
     
 
 def cleaning_gaps_from_both_edges(sequence_transcipt, sequence_genome, alignment, filename):
+    print(f'dlugosc genomowej na poczatku = {len(sequence_genome)}')
     sequence_transcipt_left_shorted = sequence_transcipt.lstrip("-")
     count_deleted_gaps_left = len(sequence_transcipt) - len(sequence_transcipt_left_shorted) #inform how many gaps were deleted from 5'
     
     sequence_transcipt_right_and_left_shorted = sequence_transcipt_left_shorted.rstrip("-")
     count_deleted_gaps_right = len(sequence_transcipt_left_shorted) - len(sequence_transcipt_right_and_left_shorted) #inform how many gaps were deleted from 3'
-    
-    sequence_genome_left_and_right_shorted = sequence_genome[count_deleted_gaps_left:-count_deleted_gaps_right]
+
+    print(f'skrocimy lewo o : {count_deleted_gaps_left}, skrocimy prawo o: {count_deleted_gaps_right}')
+    if count_deleted_gaps_right:
+        sequence_genome_left_and_right_shorted = sequence_genome[count_deleted_gaps_left:-count_deleted_gaps_right]
+    else:
+        sequence_genome_left_and_right_shorted = sequence_genome[count_deleted_gaps_left:]
+
+    print(f'dlugosc genomowej na końcu= {len(sequence_genome_left_and_right_shorted)}')
     if len(sequence_genome_left_and_right_shorted) != len(sequence_transcipt_right_and_left_shorted):
-        raise ValueError(f" VALUE ERROR: Given sequences: {alignment[0].id} - len: {len(alignment[0])} and  {alignment[1].id} - len {len(alignment[0].id)} from {filename} must have the same length.")
+        print(len(sequence_genome_left_and_right_shorted),  len(sequence_transcipt_right_and_left_shorted))
+        raise ValueError(f" VALUE ERROR: Given sequences: {alignment[0].id} - len: {len(alignment[0])} and  {alignment[1].id} - len {len(alignment[1])} from {filename} must have the same length.")
     return sequence_transcipt_right_and_left_shorted, sequence_genome_left_and_right_shorted, count_deleted_gaps_left
 
 
@@ -163,6 +172,8 @@ def indices_of_introns_and_exons_fun(seq1_DT, seq2_DT, seq1, seq2, count_deleted
     
     if len(seq1_DT) != len(seq2_DT):
         raise ValueError("The two sequences must be of the same length.")
+        print(seq1)
+        print(seq2)
     for nt1, nt2 in paired_nucleotides:
         if "-" in (nt1, nt2):
             temp_intron.append(index + count_deleted_gaps_left)
@@ -326,13 +337,15 @@ def save_to_gff_file(gff_final_data_frame, filename):
 
 def extracting_strands_from_alignment(alignment): #that function describe what strand is transcript strand and genomic strand - in our files, transcript strand has longer ID.
     #print(f"Alignment: {alignment[0].id}, funkcja: extracting_strands_from_alignment, przeszlo")
-    if len(alignment[0].id) >= len(alignment[1].id):
-        seq1 = alignment[0].seq
-        seq2 = alignment[1].seq
-        #seq1_is_transcript = True #obecnie nie uzywane
-    else:
-        seq1 = alignment[1].seq
-        seq2 = alignment[0].seq    
+    seq1 = alignment[0].seq
+    seq2 = alignment[1].seq
+    # if len(alignment[0].id) >= len(alignment[1].id):
+    #     seq1 = alignment[0].seq
+    #     seq2 = alignment[1].seq
+    #     #seq1_is_transcript = True #obecnie nie uzywane
+    # else:
+    #     seq1 = alignment[1].seq
+    #     seq2 = alignment[0].seq    
         #seq1_is_transcript = False #obecnie nie uzywane
     #print(f"\n Just run function: extracting_strands_from_alignment")
     return seq1, seq2
