@@ -5,11 +5,14 @@ import pandas as pd
 import os
 import numpy as np
 from datetime import datetime
+from IPython.display import display, HTML
+
 
 # IMPORTANT: fine_exons_df is not perfect, better one is final_fine_exon_sub_dfs. In output, there will be only
 # final_fine_exon_sub_dfs and all_exons_df
 
 # sprawdzic dlaczego introny w substring_2 sie dubluja - u LON_OG0032858
+# w przypadku gdy mamy dwa substringi, introny sa zapisywane i dublowane dla pierwszego
 
 '''
 # description of goal main goal that function is select introns and exon from alignment and describe their class,
@@ -50,7 +53,14 @@ path_to_file_after_mafft = "/home/szala/euglena/kod_i_pliki/fastas_after_mafft"
 #                             'fastas_after_mafft_na_probe')
 
 
+
+
 def cutting_scrap(path_to_file_before_mafft, path_to_file_after_mafft, acceptable_gap_length, extreme_homology):
+    pd.set_option('display.max_rows', None)
+    pd.set_option('display.max_columns', None)
+    pd.set_option('display.width', None)
+    pd.set_option('display.max_colwidth', None)
+
     now = datetime.now()
     current_time = now.strftime("%Y-%m-%d_%H:%M")
     gff_data_frames = []  # pre-list for tables
@@ -117,7 +127,6 @@ def cutting_scrap(path_to_file_before_mafft, path_to_file_after_mafft, acceptabl
                 fine_exon_sub_dict, fine_intron_sub_dict, alignments_with_one_exon = create_substring_dict(all_exon_range_dict, seq1_dt, seq2_dt,
                                                            min_length_aligned_sequence, extreme_homology,
                                                            alignments_with_one_exon)
-
                 # creating data frame with fine exons
                 fine_exon_sub_df = create_final_exon_gff_table_from_substring(fine_exon_sub_dict, seq1_dt,
                                                                                      seq2_dt, alignment_id,
@@ -125,6 +134,8 @@ def cutting_scrap(path_to_file_before_mafft, path_to_file_after_mafft, acceptabl
                                                                                      filename[:-6])
                 fine_intron_sub_df = create_final_intron_table_from_substring(fine_intron_sub_dict, alignment_id,
                                                                               column_names_substring, filename[:-6])
+
+
 
                 # Making alignment and determining class of exon according to their homology.
                 # Forming a table with exons
@@ -208,7 +219,7 @@ def cutting_scrap(path_to_file_before_mafft, path_to_file_after_mafft, acceptabl
         files_in_fine_exons_df, unique_seqid_count_fine_exons_df = getting_files_from_df(fine_exons_df, 'attributes')
         files_in_all_exons_df, unique_seqid_count_all_exons_df = getting_files_from_df(all_exons_df, 'attributes')
 
-        print(unique_seqid_count_all_exons_df)
+
 
 
     else:
@@ -232,7 +243,9 @@ def cutting_scrap(path_to_file_before_mafft, path_to_file_after_mafft, acceptabl
     with open('invalid_nucleotides', 'w') as file:
         for alignment_id, nt1, nt2, pos in invalid_nucleotides:
             file.write(f'{alignment_id}\t{nt1}\t{nt2}\t{pos}\n')
-    print(final_fine_exon_intron_sub_dfs)
+
+
+    # print(final_fine_exon_intron_sub_dfs)
 
     return fine_exons_count, length_fine_exons_df
 
@@ -518,7 +531,6 @@ def check_exon_homology(start, end, seq1_dt, seq2_dt, min_length_aligned_sequenc
 
 def create_substring_dict(all_exon_range_dict, seq1_dt, seq2_dt, min_length_aligned_sequence, extreme_homology,
                           alignments_with_one_exon):
-    # TODO: dodaj introny
     fine_exon_sub_dict = {}
     fine_intron_sub_dict = {}
     current_exon_substring = []
@@ -532,31 +544,31 @@ def create_substring_dict(all_exon_range_dict, seq1_dt, seq2_dt, min_length_alig
         else:
             if len(current_exon_substring) >= 2: #it means if there are two exons what equals there is intron between
                 fine_exon_sub_dict[f"substring_{substring_index}"] = dict(current_exon_substring)
-                fine_intron_sub_dict = create_intron_substring_dict(fine_exon_sub_dict, fine_intron_sub_dict, current_intron_substring,
-                                                                    substring_index)
                 substring_index += 1
                 current_exon_substring = []
             else:
                 alignments_with_one_exon += 1
                 current_exon_substring = []
 
-    if current_exon_substring: #to add substring when last nucleotides in alignment are exon.
+    if len(current_exon_substring) >= 2: # to add last substring when last nucleotides in alignment are exon.
         fine_exon_sub_dict[f"substring_{substring_index}"] = dict(current_exon_substring)
-        fine_intron_sub_dict = create_intron_substring_dict(fine_exon_sub_dict, fine_intron_sub_dict,
-                                                            current_intron_substring, substring_index)
+
+    fine_intron_sub_dict = create_intron_substring_dict(fine_exon_sub_dict, fine_intron_sub_dict)
 
     return fine_exon_sub_dict, fine_intron_sub_dict, alignments_with_one_exon
 
 
-def create_intron_substring_dict(fine_exon_sub_dict, fine_intron_sub_dict, current_intron_substring, substring_index):
+def create_intron_substring_dict(fine_exon_sub_dict, fine_intron_sub_dict):
     for substring, exon_ranges in fine_exon_sub_dict.items():
+        current_intron_substring = {}
         sorted_start_exon_ranges = sorted(exon_ranges.keys())
         for i in range(len(sorted_start_exon_ranges) - 1):
             start = exon_ranges[sorted_start_exon_ranges[i]] + 1
             end = sorted_start_exon_ranges[i + 1] - 1
             current_intron_substring[start] = end
-        fine_intron_sub_dict[f"substring_{substring_index}"] = current_intron_substring
-        return fine_intron_sub_dict
+        fine_intron_sub_dict[substring] = current_intron_substring
+    return fine_intron_sub_dict
+
 
 
 def create_final_exon_gff_table_from_substring(fine_exon_sub_dict, seq1_dt, seq2_dt, alignment_id,
