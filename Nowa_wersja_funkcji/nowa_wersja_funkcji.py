@@ -7,12 +7,8 @@ import numpy as np
 from datetime import datetime
 from IPython.display import display, HTML
 
-
 # IMPORTANT: fine_exons_df is not perfect, better one is final_fine_exon_sub_dfs. In output, there will be only
 # final_fine_exon_sub_dfs and all_exons_df
-
-# sprawdzic dlaczego introny w substring_2 sie dubluja - u LON_OG0032858
-# w przypadku gdy mamy dwa substringi, introny sa zapisywane i dublowane dla pierwszego
 
 '''
 # description of goal main goal that function is select introns and exon from alignment and describe their class,
@@ -38,24 +34,23 @@ from IPython.display import display, HTML
 # - they have to be .fasta
 # - acceptable_gap_length is int.
 
-min_length_aligned_sequence = 30  # Minimal length of sequence which could be an exon
+# min_length_aligned_sequence = 30  # Minimal length of sequence which could be an exon
 # extreme_homology = 0.97 #percentage of homology of sequence, threshold
 
 # na serwer
-path_to_file_before_mafft = "/home/szala/euglena/kod_i_pliki/divided_fastas"
-path_to_file_after_mafft = "/home/szala/euglena/kod_i_pliki/fastas_after_mafft"
+# path_to_file_before_mafft = "/home/szala/euglena/kod_i_pliki/divided_fastas"
+# path_to_file_after_mafft = "/home/szala/euglena/kod_i_pliki/fastas_after_mafft"
 
 
 # lokalnie
-# path_to_file_before_mafft = ('/home/norbert/mrdn/euglena/kod_i_pliki/surowe_pliki_plus_minus_500/raw_reads_9/'
-#                              'merging_fastas')
-# path_to_file_after_mafft = ('/home/norbert/mrdn/euglena/kod_i_pliki/surowe_pliki_plus_minus_500/raw_reads_9/'
-#                             'fastas_after_mafft_na_probe')
+path_to_file_before_mafft = ('/home/norbert/mrdn/euglena/kod_i_pliki/surowe_pliki_plus_minus_500/raw_reads_9/'
+                             'merging_fastas')
+path_to_file_after_mafft = ('/home/norbert/mrdn/euglena/kod_i_pliki/surowe_pliki_plus_minus_500/raw_reads_9/'
+                            'fastas_after_mafft_na_probe')
 
 
-
-
-def cutting_scrap(path_to_file_before_mafft, path_to_file_after_mafft, acceptable_gap_length, extreme_homology):
+def cutting_scrap(path_to_file_before_mafft, path_to_file_after_mafft, acceptable_gap_length, extreme_homology,
+                  min_length_aligned_sequence):
     pd.set_option('display.max_rows', None)
     pd.set_option('display.max_columns', None)
     pd.set_option('display.width', None)
@@ -67,6 +62,13 @@ def cutting_scrap(path_to_file_before_mafft, path_to_file_after_mafft, acceptabl
     final_fine_exon_sub_df = []
     final_fine_intron_sub_df = []
     invalid_nucleotides = []
+    average_introns_length_all = {}
+    unique_seqid_in_final_df_number_all = {}
+    substrings_introns_number_all = {}
+    files_in_final_fine_exon_intron_sub_dfs_all = {}
+    introns_count_all = {}
+    exons_count_all = {}
+
     gaps_signs = "-" * acceptable_gap_length  # maximum length of gaps in sequence in one exon's sequence
     files_in_progress = 0
     alignments_with_one_exon = 0
@@ -75,6 +77,7 @@ def cutting_scrap(path_to_file_before_mafft, path_to_file_after_mafft, acceptabl
                     'attributes']
     column_names_substring = ['seqid', 'source', 'exon_type', 'start', 'end', 'length', 'homology', 'strand', 'phase',
                               'attributes', 'substring']
+    species = ['gra', 'lon', 'hie']
     print(f"\n \n \n \n Start running function: cutting_scrap")
 
     total_files = len([f for f in os.listdir(path_to_file_after_mafft) if f.endswith(".fasta")])
@@ -88,10 +91,10 @@ def cutting_scrap(path_to_file_before_mafft, path_to_file_after_mafft, acceptabl
             try:
                 files_in_progress += 1
                 count_files = percentage_of_advancement(path_to_file_before_mafft)
-                print(f"\n ################################################################################### \n "
-                      f"running file: {filename} which is {files_in_progress} of {count_files}, what means "
-                      f"{round(files_in_progress / count_files * 100, 2)}% of advancement \n "
-                      f"################################################################################### \n")
+                # print(f"\n ################################################################################### \n "
+                #       f"running file: {filename} which is {files_in_progress} of {count_files}, what means "
+                #       f"{round(files_in_progress / count_files * 100, 2)}% of advancement \n "
+                #       f"################################################################################### \n")
                 alignment = AlignIO.read(file, "fasta")
                 alignment_id = alignment[0].id
                 alignment_didnt_touched = AlignIO.read(file, "fasta")
@@ -124,18 +127,15 @@ def cutting_scrap(path_to_file_before_mafft, path_to_file_after_mafft, acceptabl
                 # method with higher accuracy. Introns exist when they are surrounded by two exons like: ex int ex.
                 # Create substrings with only fine exons. Sometimes in one alignment there it more than one substring,
                 # when between two fine exons is one bad exon
-                fine_exon_sub_dict, fine_intron_sub_dict, alignments_with_one_exon = create_substring_dict(all_exon_range_dict, seq1_dt, seq2_dt,
-                                                           min_length_aligned_sequence, extreme_homology,
-                                                           alignments_with_one_exon)
+                fine_exon_sub_dict, fine_intron_sub_dict, alignments_with_one_exon = create_substring_dict(
+                    all_exon_range_dict, seq1_dt, seq2_dt, min_length_aligned_sequence, extreme_homology,
+                    alignments_with_one_exon)
                 # creating data frame with fine exons
-                fine_exon_sub_df = create_final_exon_gff_table_from_substring(fine_exon_sub_dict, seq1_dt,
-                                                                                     seq2_dt, alignment_id,
-                                                                                     column_names_substring,
-                                                                                     filename[:-6])
+                fine_exon_sub_df = create_final_exon_gff_table_from_substring(fine_exon_sub_dict, seq1_dt, seq2_dt,
+                                                                              alignment_id, column_names_substring,
+                                                                              filename[:-6])
                 fine_intron_sub_df = create_final_intron_table_from_substring(fine_intron_sub_dict, alignment_id,
                                                                               column_names_substring, filename[:-6])
-
-
 
                 # Making alignment and determining class of exon according to their homology.
                 # Forming a table with exons
@@ -171,33 +171,45 @@ def cutting_scrap(path_to_file_before_mafft, path_to_file_after_mafft, acceptabl
                                                    ignore_index=True)
         final_fine_exon_intron_sub_dfs = final_fine_exon_intron_sub_dfs.sort_values(by=['attributes', 'start'])
 
-        files_in_final_fine_exon_intron_sub_dfs, unique_seqid_count_fine_final_exon_intron_dfs = (
-            getting_files_from_df(final_fine_exon_intron_sub_dfs, 'attributes'))
+        files_in_final_fine_exon_intron_sub_dfs_all, files_in_final_fine_exon_intron_sub_dfs, unique_seqid_in_final_df_number = (
+            getting_files_from_df(final_fine_exon_intron_sub_dfs, 'attributes',
+                                  files_in_final_fine_exon_intron_sub_dfs_all, species))
 
-        print(unique_seqid_count_fine_final_exon_intron_dfs, alignments_with_one_exon, total_files)
-        print(
-            f'{round((((unique_seqid_count_fine_final_exon_intron_dfs) / total_files) * 100), 2)}% of files end up succesfully. \n '
-            f' There were {len(broken_files)} errors. List of files with errors in broken_files file.'
-            f'Invalid nucleotides (different than A T G C) are written with positions in invalid_nucleotides file. '
-            f'\n \n Found {unique_seqid_count_fine_final_exon_intron_dfs} unique files in data frame from {count_files} '
-            f'from input. It means {count_files - unique_seqid_count_fine_final_exon_intron_dfs} files wasn\'t written '
-            f'down to output, propably because lack of exons. List of that files is in no_exons_files file. \n \n There were '
-            f'{alignments_with_one_exon} alignments with only one exon in substrings, so they are not included in overall '
-            f'amount of exons.')
-        fine_exons_count = final_fine_exon_intron_sub_dfs['exon_type'].str.contains('fine', case=False).sum()
+        # Extracing information from final df
+        filtered_introns_df = final_fine_exon_intron_sub_dfs[
+            final_fine_exon_intron_sub_dfs['exon_type'] == 'intron'].copy()
+
+        introns_count_all, average_introns_length_all, substrings_introns_number_all, unique_seqid_in_final_df_number_all = extracting_informations_to_return(
+            filtered_introns_df, species, introns_count_all, average_introns_length_all, substrings_introns_number_all,
+            unique_seqid_in_final_df_number_all)
+
+        for specie in species:
+            exons_count_all[specie] = final_fine_exon_intron_sub_dfs[(final_fine_exon_intron_sub_dfs['exon_type'] == 'fine') & (
+            final_fine_exon_intron_sub_dfs['seqid'].str.startswith(specie.upper()))].shape[0]
+
+
+        print(f'{round(((unique_seqid_in_final_df_number / total_files) * 100), 2)}% of files end up succesfully. \n '
+              f' There were {len(broken_files)} errors. List of files with errors in broken_files file.'
+              f'Invalid nucleotides (different than A T G C) are written with positions in invalid_nucleotides file. '
+              f'\n \n Found {unique_seqid_in_final_df_number} unique files in data frame from {count_files} '
+              f'from input. It means {count_files - unique_seqid_in_final_df_number} files wasn\'t written '
+              f'down to output, propably because lack of exons. List of that files is in no_exons_files file. \n \n There were '
+              f'{alignments_with_one_exon} alignments with only one exon in substrings, so they are not included in overall '
+              f'amount of exons.')
 
         files_not_in_exon_intron_dfs = find_alignments_not_in_df(path_to_file_after_mafft,
                                                                  files_in_final_fine_exon_intron_sub_dfs)
 
         with open(f'results_{current_time}', 'w') as file:
-            file.write(f'{round((((unique_seqid_count_fine_final_exon_intron_dfs) / total_files) * 100), 2)}% of files end up succesfully. \n '
-            f' There were {len(broken_files)} errors. List of files with errors in broken_files file.'
-            f'Invalid nucleotides (different than A T G C) are written with positions in invalid_nucleotides file. '
-            f'\n \n Found {unique_seqid_count_fine_final_exon_intron_dfs} unique files in data frame from {count_files} '
-            f'from input. It means {count_files - unique_seqid_count_fine_final_exon_intron_dfs} files wasn\'t written '
-            f'down to output, propably because lack of exons. List of that files is in no_exons_files file. \n \n There were '
-            f'{alignments_with_one_exon} alignments with only one exon in substrings, so they are not included in overall '
-            f'amount of exons.')
+            file.write(
+                f'{round((((unique_seqid_in_final_df_number) / total_files) * 100), 2)}% of files end up succesfully. \n '
+                f' There were {len(broken_files)} errors. List of files with errors in broken_files file.'
+                f'Invalid nucleotides (different than A T G C) are written with positions in invalid_nucleotides file. '
+                f'\n \n Found {unique_seqid_in_final_df_number} unique files in data frame from {count_files} '
+                f'from input. It means {count_files - unique_seqid_in_final_df_number} files wasn\'t written '
+                f'down to output, propably because lack of exons. List of that files is in no_exons_files file. \n \n There were '
+                f'{alignments_with_one_exon} alignments with only one exon in substrings, so they are not included in overall '
+                f'amount of exons.')
 
         with open('no_exons_files', 'w') as file:
             file.write('Files absent in data frame from input. Probably because lack of introns \n')
@@ -207,47 +219,24 @@ def cutting_scrap(path_to_file_before_mafft, path_to_file_after_mafft, acceptabl
     else:
         print("No valid data frames to concatenate.")
         final_fine_exon_intron_sub_dfs = pd.DataFrame(columns=column_names_substring)
-        fine_exons_count = 0
-
-    if not len(gff_data_frames) == 0:
-        all_exons_df = pd.concat(gff_data_frames, ignore_index=True)
-        tlh_exons_df = all_exons_df[all_exons_df['exon_type'] == 'tlh'].copy()
-        fine_exons_df = all_exons_df[all_exons_df['exon_type'] == 'fine'].copy()
-
-        all_exons_df, tlh_exons_df, fine_exons_df = adding_introns_to_gff_data_frame(all_exons_df, tlh_exons_df,
-                                                                                     fine_exons_df, column_names)
-        files_in_fine_exons_df, unique_seqid_count_fine_exons_df = getting_files_from_df(fine_exons_df, 'attributes')
-        files_in_all_exons_df, unique_seqid_count_all_exons_df = getting_files_from_df(all_exons_df, 'attributes')
-
-
-
-
-    else:
-        print("No valid data frames to concatenate.")
-        all_exons_df = pd.DataFrame(columns=column_names)
-        tlh_exons_df = pd.DataFrame(columns=column_names)
-        fine_exons_df = pd.DataFrame(columns=column_names)
-        fine_exons_count = 0
+        introns_count_all = 0
 
     # Saving table in tsv gff format
     # save_to_gff_file(all_exons_df, 'all_exons_gff.tsv')
     # save_to_gff_file(tlh_exons_df, 'tlh_exons_gff.tsv')
     # save_to_gff_file(fine_exons_df, 'fine_exons_gff.tsv')
-    save_to_gff_file(final_fine_exon_intron_sub_dfs, 'final_fine_exon_intron_sub_dfs.tsv')
+    # save_to_gff_file(final_fine_exon_intron_sub_dfs, 'final_fine_exon_intron_sub_dfs.tsv')
 
     with open('broken_files', 'w') as file:
         file.write('Files which made error: \n')
         file.write(str(broken_files))
-    length_fine_exons_df = len(fine_exons_df)
 
     with open('invalid_nucleotides', 'w') as file:
         for alignment_id, nt1, nt2, pos in invalid_nucleotides:
             file.write(f'{alignment_id}\t{nt1}\t{nt2}\t{pos}\n')
 
-
-    # print(final_fine_exon_intron_sub_dfs)
-
-    return fine_exons_count, length_fine_exons_df
+    return (exons_count_all, introns_count_all, unique_seqid_in_final_df_number_all, average_introns_length_all,
+            substrings_introns_number_all)
 
 
 ########################################################################################################################
@@ -499,11 +488,14 @@ def getting_files_in_directory(path_to_file_after_mafft):
         return [entry.name.split('.')[0] for entry in entries if entry.is_file()]
 
 
-def getting_files_from_df(df, column_name):
+def getting_files_from_df(df, column_name, files_in_final_fine_exon_intron_sub_dfs_all, species):
     # creating list with unique names in df and counting unique names in df
     unique_names = df[column_name].astype(str).unique().tolist()
+    for specie in species:
+        files_in_final_fine_exon_intron_sub_dfs_all[specie] = [file for file in unique_names if
+                                                               file.upper().startswith(str(specie).upper())]
     unique_numbers = df[column_name].nunique()
-    return unique_names, unique_numbers
+    return files_in_final_fine_exon_intron_sub_dfs_all, unique_names, unique_numbers
 
 
 def find_alignments_not_in_df(path_to_file_after_mafft, files_in_exons_df):
@@ -542,7 +534,7 @@ def create_substring_dict(all_exon_range_dict, seq1_dt, seq2_dt, min_length_alig
             current_exon_substring.append((start, end))
 
         else:
-            if len(current_exon_substring) >= 2: #it means if there are two exons what equals there is intron between
+            if len(current_exon_substring) >= 2:  #it means if there are two exons what equals there is intron between
                 fine_exon_sub_dict[f"substring_{substring_index}"] = dict(current_exon_substring)
                 substring_index += 1
                 current_exon_substring = []
@@ -550,7 +542,7 @@ def create_substring_dict(all_exon_range_dict, seq1_dt, seq2_dt, min_length_alig
                 alignments_with_one_exon += 1
                 current_exon_substring = []
 
-    if len(current_exon_substring) >= 2: # to add last substring when last nucleotides in alignment are exon.
+    if len(current_exon_substring) >= 2:  # to add last substring when last nucleotides in alignment are exon.
         fine_exon_sub_dict[f"substring_{substring_index}"] = dict(current_exon_substring)
 
     fine_intron_sub_dict = create_intron_substring_dict(fine_exon_sub_dict, fine_intron_sub_dict)
@@ -570,9 +562,8 @@ def create_intron_substring_dict(fine_exon_sub_dict, fine_intron_sub_dict):
     return fine_intron_sub_dict
 
 
-
 def create_final_exon_gff_table_from_substring(fine_exon_sub_dict, seq1_dt, seq2_dt, alignment_id,
-                                                      column_names_substring, filename):
+                                               column_names_substring, filename):
     fine_exon_sub_df = []
     aligner = Align.PairwiseAligner()
     aligner.mismatch_score = 0  # customized setting towards get pure percentage of homology, not alignment with gap
@@ -589,10 +580,11 @@ def create_final_exon_gff_table_from_substring(fine_exon_sub_dict, seq1_dt, seq2
             score = aligner.score(query, target)
             identity_level = (round(((score * 100) / len(target)), 2))
             fine_exon_sub_df.append((
-                                    alignment_id, source, exon_class, start, end, (end - start + 1), identity_level, strand,
-                                    '.', filename, substring))
+                alignment_id, source, exon_class, start, end, (end - start + 1), identity_level, strand, '.', filename,
+                substring))
     data_frame = pd.DataFrame(fine_exon_sub_df, columns=column_names_substring)
     return data_frame
+
 
 def create_final_intron_table_from_substring(fine_intron_sub_dict, alignment_id, column_names_substring, filename):
     fine_intron_sub_df = []
@@ -601,11 +593,23 @@ def create_final_intron_table_from_substring(fine_intron_sub_dict, alignment_id,
     strand = extending_strand_data_frame(alignment_id)
     for substring, exon_range in fine_intron_sub_dict.items():
         for start, end in exon_range.items():
-            fine_intron_sub_df.append((alignment_id, source, exon_class, start, end, (end-start), 0, strand,
-                                       '.', filename, substring))
+            fine_intron_sub_df.append(
+                (alignment_id, source, exon_class, start, end, (end - start), 0, strand, '.', filename, substring))
     data_frame = pd.DataFrame(fine_intron_sub_df, columns=column_names_substring)
     return data_frame
 
 
+def extracting_informations_to_return(df_with_introns, list_of_species, introns_count_all, average_introns_length_all,
+                                      substrings_introns_number_all, unique_seqid_in_final_df_number_all):
+    for specie in list_of_species:
+        specie_df = df_with_introns[df_with_introns['seqid'].str.contains(str(specie).upper())]
+        introns_count_all[specie] = round(len(specie_df), 2)
+        average_introns_length_all[specie] = round(float(specie_df['length'].mean()), 2)
+        substrings_introns_number_all[specie] = (specie_df[['seqid', 'substring']].drop_duplicates()).shape[0]
+        unique_seqid_in_final_df_number_all[specie] = specie_df['seqid'].nunique()
+
+    return introns_count_all, average_introns_length_all, substrings_introns_number_all, unique_seqid_in_final_df_number_all
+
+
 if __name__ == '__main__':
-    cutting_scrap(path_to_file_before_mafft, path_to_file_after_mafft, 2, 0.95)
+    cutting_scrap(path_to_file_before_mafft, path_to_file_after_mafft, 2, 0.95, 30)
