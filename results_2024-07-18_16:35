@@ -1,0 +1,6 @@
+40.9% of files end up succesfully. 
+  There were 0 errors. List of files with errors in broken_files file.Invalid nucleotides (different than A T G C) are written with positions in invalid_nucleotides file. 
+ 
+ Found 1151 unique files in data frame from 2814 from input. It means 1663 files wasn't written down to output, propably because lack of exons. List of that files is in no_exons_files file. 
+ 
+ There were 106639 alignments with only one exon in substrings, so they are not included in overall amount of exons.
