@@ -20,7 +20,7 @@ from IPython.display import display, HTML
 # 5. Creating list with nucleotides's positions of intron or exon
 # 6. Creating dictionary like: start_exon:end_exon. If distance between two following indices is bigger than two
 # (acceptable gap length) then there is intron between them.
-# 7. Creating substring in format: exon intron exon XXXX - if XXXX is bad exon, substring equals exon intron exon. 
+# 7. Creating substring in format: exon intron exon XXXX - if XXXX is bad exon, substring equals exon intron exon.
 # Another substring is creating by next proper exon. Substring are used to make final_fine_exon_intron_sub_dfs
 # 8. Making alignment and determining class of exon according to their homology. It is used to make all_exons_df
 # 9. Forming a table with exons
@@ -42,11 +42,17 @@ path_to_file_before_mafft = "/home/szala/euglena/kod_i_pliki/divided_fastas"
 path_to_file_after_mafft = "/home/szala/euglena/kod_i_pliki/fastas_after_mafft"
 
 
+
 # lokalnie
 # path_to_file_before_mafft = ('/home/norbert/mrdn/euglena/kod_i_pliki/surowe_pliki_plus_minus_500/raw_reads_9/'
 #                              'merging_fastas')
 # path_to_file_after_mafft = ('/home/norbert/mrdn/euglena/kod_i_pliki/surowe_pliki_plus_minus_500/raw_reads_9/'
 #                             'fastas_after_mafft_na_probe')
+
+
+#lokalnie caly zbior
+# path_to_file_before_mafft = '/home/norbert/mrdn/euglena/kod_i_pliki/Nowa_wersja_funkcji/divided_fastas'
+# path_to_file_after_mafft = '/home/norbert/mrdn/euglena/kod_i_pliki/Nowa_wersja_funkcji/fastas_after_mafft'
 
 
 def cutting_scrap(path_to_file_before_mafft, path_to_file_after_mafft, acceptable_gap_length, extreme_homology,
@@ -75,7 +81,7 @@ def cutting_scrap(path_to_file_before_mafft, path_to_file_after_mafft, acceptabl
     broken_files = []  # list of files which caused error
     column_names = ['seqid', 'source', 'exon_type', 'start', 'end', 'length', 'homology', 'strand', 'phase',
                     'attributes']
-    column_names_substring = ['seqid', 'source', 'exon_type', 'start', 'end', 'length', 'homology', 'strand', 'phase',
+    column_names_substring = ['seqid', 'source', 'exon_type', 'start', 'end', 'length', 'homology', 'GC', 'strand', 'phase',
                               'attributes', 'substring']
     species = ['gra', 'lon', 'hie']
     print(f"\n \n \n \n Start running function: cutting_scrap")
@@ -137,7 +143,7 @@ def cutting_scrap(path_to_file_before_mafft, path_to_file_after_mafft, acceptabl
                                                                               alignment_id, column_names_substring,
                                                                               filename[:-6])
                 fine_intron_sub_df = create_final_intron_table_from_substring(fine_intron_sub_dict, alignment_id,
-                                                                              column_names_substring, filename[:-6])
+                                                                              column_names_substring, filename[:-6], seq2_dt)
 
                 # Making alignment and determining class of exon according to their homology.
                 # Forming a table with exons
@@ -171,11 +177,18 @@ def cutting_scrap(path_to_file_before_mafft, path_to_file_after_mafft, acceptabl
         #                                                                         column_names_substring)
         final_fine_exon_intron_sub_dfs = pd.concat([final_fine_exon_sub_dfs, final_fine_intron_sub_dfs],
                                                    ignore_index=True)
+
+        final_fine_exon_intron_sub_dfs = final_fine_exon_intron_sub_dfs[~((final_fine_exon_intron_sub_dfs['length'] < 40)
+                                                                        & (final_fine_exon_intron_sub_dfs['exon_type']
+                                                                           == 'intron'))]
+
         final_fine_exon_intron_sub_dfs = final_fine_exon_intron_sub_dfs.sort_values(by=['attributes', 'start'])
 
         files_in_final_fine_exon_intron_sub_dfs_all, files_in_final_fine_exon_intron_sub_dfs, unique_seqid_in_final_df_number = (
             getting_files_from_df(final_fine_exon_intron_sub_dfs, 'attributes',
                                   files_in_final_fine_exon_intron_sub_dfs_all, species))
+
+
 
         # Extracing information from final df
         filtered_introns_df = final_fine_exon_intron_sub_dfs[
@@ -228,7 +241,8 @@ def cutting_scrap(path_to_file_before_mafft, path_to_file_after_mafft, acceptabl
     # save_to_gff_file(all_exons_df, 'all_exons_gff.tsv')
     # save_to_gff_file(tlh_exons_df, 'tlh_exons_gff.tsv')
     # save_to_gff_file(fine_exons_df, 'fine_exons_gff.tsv')
-    save_to_gff_file(final_fine_exon_intron_sub_dfs, 'final_fine_exon_intron_sub_dfs.tsv')
+    # save_to_gff_file(final_fine_exon_intron_sub_dfs, 'final_fine_exon_intron_sub_dfs.tsv')
+
 
     with open('broken_files', 'w') as file:
         file.write('Files which made error: \n')
@@ -240,6 +254,8 @@ def cutting_scrap(path_to_file_before_mafft, path_to_file_after_mafft, acceptabl
 
     return (exons_count_all, introns_count_all, unique_seqid_in_final_df_number_all, average_introns_length,
             average_introns_length_all, substrings_introns_number_all, final_fine_exon_intron_sub_dfs)
+
+
 
 
 ########################################################################################################################
@@ -320,7 +336,7 @@ def start_and_end_parameters_of_exons_dict_fun(temp_exon, gaps_signs):
 
     for i in range(len(temp_exon)):
         # print(start_exon)
-        if (temp_exon[i] - temp_exon[i - 1]) > len(gaps_signs):  # if difference between two indices of exons's
+        if (temp_exon[i] - temp_exon[i - 1]) > len(gaps_signs) +1:  # if difference between two indices of exons's
             # positions is bigger than given number (2), that smaller number is index of 3' nucleotide in exon
             end_exon = temp_exon[i - 1]  # temp_exon[i-1] because it is index in list temp_exon. +1 because python
             # starts counting from 0
@@ -366,7 +382,7 @@ def making_exons_gff_table_fun(all_exon_range_dict, min_length_aligned_sequence,
         target = seq2_dt[key - 1: all_exon_range_dict[key]]
         target_length = len(target)
 
-        if target_length > min_length_aligned_sequence:
+        if target_length >= min_length_aligned_sequence:
             score, identity_level = manual_counting_alignment_score(query, target, target_length)
 
             # print(f'query: {query}, \ntarget: {target}, percent of homology = {round(score / len(target), 2)* 100} %, '
@@ -519,7 +535,7 @@ def check_exon_homology(start, end, seq1_dt, seq2_dt, min_length_aligned_sequenc
     target = seq2_dt[start - 1: end]
     target_length = len(target)
     # print(f'przed if: \n query: target: \n{query}\n{target} \n target length: {target_length}\n minlength: {min_length_aligned_sequence}')
-    if target_length > min_length_aligned_sequence:
+    if target_length >= min_length_aligned_sequence:
         score, identity_level = manual_counting_alignment_score(query, target, target_length)
         if identity_level >= extreme_homology * 100:
             # print(f'score: {score}, identity level: {identity_level}, extreme homology: {extreme_homology}')
@@ -579,25 +595,34 @@ def create_final_exon_gff_table_from_substring(fine_exon_sub_dict, seq1_dt, seq2
             target = seq2_dt[start - 1: end]
             target_length = len(target)
             score, identity_level = manual_counting_alignment_score(query, target, target_length)
+            GC = GC_counting(start, end, seq1_dt)
             fine_exon_sub_df.append((
-                alignment_id, source, exon_class, start, end, (end - start + 1), identity_level, strand, '.', filename,
+                alignment_id, source, exon_class, start, end, (end - start + 1), identity_level, GC, strand, '.', filename,
                 substring))
     data_frame = pd.DataFrame(fine_exon_sub_df, columns=column_names_substring)
     return data_frame
 
 
-def create_final_intron_table_from_substring(fine_intron_sub_dict, alignment_id, column_names_substring, filename):
+def create_final_intron_table_from_substring(fine_intron_sub_dict, alignment_id, column_names_substring, filename, seq2_dt):
     fine_intron_sub_df = []
     exon_class = 'intron'
     source = extending_strand_data_frame(alignment_id)
     strand = extending_strand_data_frame(alignment_id)
+
     for substring, exon_range in fine_intron_sub_dict.items():
         for start, end in exon_range.items():
+            GC = GC_counting(start, end, seq2_dt)
             fine_intron_sub_df.append(
-                (alignment_id, source, exon_class, start, end, (end - start), 0, strand, '.', filename, substring))
+                (alignment_id, source, exon_class, start, end, (end - start +1), 0, GC, strand, '.', filename, substring))
     data_frame = pd.DataFrame(fine_intron_sub_df, columns=column_names_substring)
     return data_frame
 
+def GC_counting(start, end, seq):
+    sequence = seq[start - 1: end]
+    # print(sequence)
+    GC_count = round((sequence.count('g') + sequence.count('c')) / len(sequence) * 100, 2)
+    # print(GC_count)
+    return GC_count
 
 def extracting_informations_to_return(df_with_introns, list_of_species, introns_count_all, average_introns_length,
                                       substrings_introns_number_all, unique_seqid_in_final_df_number_all):
@@ -613,3 +638,4 @@ def extracting_informations_to_return(df_with_introns, list_of_species, introns_
 
 if __name__ == '__main__':
     cutting_scrap(path_to_file_before_mafft, path_to_file_after_mafft, 2, 0.93, 20)
+

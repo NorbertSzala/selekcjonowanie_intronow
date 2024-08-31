@@ -15,12 +15,12 @@ from nowa_wersja_funkcji import cutting_scrap
 path_to_file_before_mafft = '/home/szala/euglena/kod_i_pliki/divided_fastas'
 path_to_file_after_mafft = '/home/szala/euglena/kod_i_pliki/fastas_after_mafft'
 
-# path_to_file_before_mafft = ('/home/norbert/mrdn/euglena/kod_i_pliki/surowe_pliki_plus_minus_500/raw_reads_9/'
-#                              'merging_fastas')
-# path_to_file_after_mafft = ('/home/norbert/mrdn/euglena/kod_i_pliki/surowe_pliki_plus_minus_500/raw_reads_9/'
-#                             'fastas_after_mafft_na_probe')
-#
-# path_to_save_charts = '/home/norbert/mrdn/euglena/kod_i_pliki/Nowa_wersja_funkcji/charts'
+#path_to_file_before_mafft = ('/home/norbert/mrdn/euglena/kod_i_pliki/surowe_pliki_plus_minus_500/raw_reads_9/'
+ #                            'merging_fastas')
+#path_to_file_after_mafft = ('/home/norbert/mrdn/euglena/kod_i_pliki/surowe_pliki_plus_minus_500/raw_reads_9/'
+ #                           'fastas_after_mafft_na_probe')
+
+#path_to_save_charts = '/home/norbert/mrdn/euglena/kod_i_pliki/Nowa_wersja_funkcji/charts_length'
 path_to_save_charts = '/home/szala/euglena/kod_i_pliki/charts_length'
 
 
@@ -38,7 +38,6 @@ def ten_times_funkcja():
          average_introns_length_all, substrings_introns_number, main_df) = (cutting_scrap(path_to_file_before_mafft,
                                                                                           path_to_file_after_mafft, 2,
                                                                                           0.95, i))
-        print(average_introns_length_all)
         exons_count_dict[i] = exons_count_all
         exons_count_df = making_summary_df(exons_count_dict)
         exons_count_df['description'] = 'exons_count'
@@ -53,7 +52,7 @@ def ten_times_funkcja():
 
         average_introns_length_dict[i] = average_introns_length
         average_introns_length_dict_all[i] = average_introns_length_all
-        print(average_introns_length_dict_all)
+
         average_introns_length_df_spec = pd.DataFrame(average_introns_length_dict).T.reset_index().rename(
             columns={'index': 'min_ex_len'})
         average_introns_length_df_all = pd.DataFrame(list(average_introns_length_dict_all.items()),
@@ -104,7 +103,7 @@ index = np.arange(len(df_count))
 
 # Zmiana kolejności słupków i ich pozycji
 bars_sum = ax.bar(index - 1.5*bar_width, df_count['sum'], bar_width, alpha=opacity, edgecolor='black', color='#0d1949',
-                  label='Sum')
+                  label='Razem')
 bar_gra = ax.bar(index - 0.5*bar_width, df_count['gra'], bar_width, alpha=opacity, edgecolor='black', color='#3e5a6f',
                  label='E. gracilis')
 bar_lon = ax.bar(index + 1.5*bar_width, df_count['lon'], bar_width, alpha=opacity, edgecolor='black', color='#a0ddba',
@@ -118,11 +117,11 @@ ax.grid(True, linestyle='--', alpha=0.7)
 for bars in [bars_sum, bar_gra, bar_lon, bar_hie]:
     for bar in bars:
         yval = bar.get_height()
-        ax.text(bar.get_x() + bar.get_width()/2, yval, round(yval, 2), ha='center', va='bottom', fontsize=8)
+        ax.text(bar.get_x() + bar.get_width()/2, yval, round(yval, 2), ha='center', va='bottom', fontsize=10)
 
-ax.set_ylabel('Number of introns', fontsize=12, labelpad=15)
-ax.set_xlabel('Minimal exon\'s length', fontsize=12, labelpad=15)
-ax.set_title('Number of introns depending on exon\'s length', fontsize=18, pad=20)
+ax.set_ylabel('Liczba intronów', fontsize=14, labelpad=15)
+ax.set_xlabel('Minimalna długość eksonów otaczających intron', fontsize=14, labelpad=15)
+ax.set_title('Liczba intronów dla poszczególnych gatunków euglenin w zależności od minimalnej \n długości eksonu', fontsize=18, pad=20)
 
 ax.set_xticks(index)
 ax.set_xticklabels(df_count['min_ex_len'])
@@ -130,10 +129,10 @@ ax.tick_params(axis='both', which='major', labelsize=10)
 ax.set_facecolor('#f5f5f5')
 
 handles = [bars_sum, bar_gra, bar_hie, bar_lon]
-ax.legend(handles=handles, labels=['Sum', 'E. gracilis', 'E. hiemalis', 'E. longa'], loc='upper center', bbox_to_anchor=(0.5, -0.15), ncol=4)
+ax.legend(handles=handles, labels=['Razem', 'E. gracilis', 'E. hiemalis', 'E. longa'], loc='upper center', bbox_to_anchor=(0.5, -0.15), ncol=4)
 
 plt.tight_layout()
-plt.savefig(f'{path_to_save_charts}/number_of_introns.png', format='png', dpi=300)
+plt.savefig(f'{path_to_save_charts}/number_of_introns_len.png', format='png', dpi=300)
 plt.show()
 
 
@@ -146,7 +145,7 @@ index = np.arange(len(df_unique))
 
 # Zmiana kolejności słupków i ich pozycji
 bars_sum = ax.bar(index - 1.5*bar_width, df_count['sum']/df_unique['sum'], bar_width, alpha=opacity, edgecolor='black', color='#0d1949',
-                  label='Sum')
+                  label='Razem')
 bar_gra = ax.bar(index - 0.5*bar_width, df_count['gra']/df_unique['gra'], bar_width, alpha=opacity, edgecolor='black', color='#3e5a6f',
                  label='E. gracilis')
 bar_lon = ax.bar(index + 1.5*bar_width, df_count['lon']/df_unique['lon'], bar_width, alpha=opacity, edgecolor='black', color='#a0ddba',
@@ -160,20 +159,20 @@ ax.grid(True, linestyle='--', alpha=0.7)
 for bars in [bars_sum, bar_gra, bar_lon, bar_hie]:
     for bar in bars:
         yval = bar.get_height()
-        ax.text(bar.get_x() + bar.get_width()/2, yval, f"{yval:.2f}", ha='center', va='bottom', fontsize=8)
-ax.set_ylabel('Number of introns per sequence', fontsize=12, labelpad=15)
-ax.set_xlabel('Minimal exon\'s length', fontsize=12, labelpad=15)
-ax.set_title('Number of introns per sequence depending on exon\'s length', fontsize=18, pad=20)
+        ax.text(bar.get_x() + bar.get_width()/2, yval, f"{yval:.2f}", ha='center', va='bottom', fontsize=10)
+ax.set_ylabel('Liczba intronów w przeliczeniu na sekwencje', fontsize=14, labelpad=15)
+ax.set_xlabel('Minimalna długość eksonu otaczającego intron', fontsize=14, labelpad=15)
+ax.set_title('Liczba intronów w przeliczeniu sekwencje w zależności od minimalnej długości eksonu', fontsize=18, pad=20)
 
 ax.set_xticks(index)
 ax.set_xticklabels(df_unique['min_ex_len'])
 ax.tick_params(axis='both', which='major', labelsize=10)
 ax.set_facecolor('#f5f5f5')
 
-ax.legend(handles=handles, labels=['Sum', 'E. gracilis', 'E. hiemalis', 'E. longa'], loc='upper center', bbox_to_anchor=(0.5, -0.15), ncol=4)
+ax.legend(handles=handles, labels=['Razem', 'E. gracilis', 'E. hiemalis', 'E. longa'], loc='upper center', bbox_to_anchor=(0.5, -0.15), ncol=4)
 
 plt.tight_layout()
-plt.savefig(f'{path_to_save_charts}/number_of_introns_per_sequence.png', format='png', dpi=300)
+plt.savefig(f'{path_to_save_charts}/number_of_introns_per_sequence_len.png', format='png', dpi=300)
 plt.show()
 ###
 
@@ -186,7 +185,7 @@ index = np.arange(len(df_unique))
 
 # Zmiana kolejności słupków i ich pozycji
 bars_sum = ax.bar(index - 1.5*bar_width, df_count['sum']/df_sub['sum'], bar_width, alpha=opacity, edgecolor='black', color='#0d1949',
-                  label='Sum')
+                  label='Razem')
 bar_gra = ax.bar(index - 0.5*bar_width, df_count['gra']/df_sub['gra'], bar_width, alpha=opacity, edgecolor='black', color='#3e5a6f',
                  label='E. gracilis')
 bar_lon = ax.bar(index + 1.5*bar_width, df_count['lon']/df_sub['lon'], bar_width, alpha=opacity, edgecolor='black', color='#a0ddba',
@@ -200,21 +199,21 @@ ax.grid(True, linestyle='--', alpha=0.7)
 for bars in [bars_sum, bar_gra, bar_lon, bar_hie]:
     for bar in bars:
         yval = bar.get_height()
-        ax.text(bar.get_x() + bar.get_width()/2, yval, f"{yval:.2f}", ha='center', va='bottom', fontsize=8)
-ax.set_ylabel('Number of introns per substring', fontsize=12, labelpad=15)
-ax.set_xlabel('Minimal exon\'s length', fontsize=12, labelpad=15)
-ax.set_title('Number of introns per substring depending on exon\'s length', fontsize=18, pad=20)
+        ax.text(bar.get_x() + bar.get_width()/2, yval, f"{yval:.2f}", ha='center', va='bottom', fontsize=10)
+ax.set_ylabel('Liczba intronów przypadająca na jeden substring', fontsize=14, labelpad=15)
+ax.set_xlabel('Minimalna długość eksonu otaczającego intron', fontsize=14, labelpad=15)
+ax.set_title('Stosunek liczby intronów do liczby substringów w zależności od minimalnej\n długości eksonu', fontsize=18, pad=20)
 
 ax.set_xticks(index)
 ax.set_xticklabels(df_sub['min_ex_len'])
 ax.tick_params(axis='both', which='major', labelsize=10)
 ax.set_facecolor('#f5f5f5')
 
-ax.legend(handles=handles, labels=['Sum', 'E. gracilis', 'E. hiemalis', 'E. longa'], loc='upper center', bbox_to_anchor=(0.5, -0.15), ncol=4)
+ax.legend(handles=handles, labels=['Razem', 'E. gracilis', 'E. hiemalis', 'E. longa'], loc='upper center', bbox_to_anchor=(0.5, -0.15), ncol=4)
 
 
 plt.tight_layout()
-plt.savefig(f'{path_to_save_charts}/number_of_introns_per_substring.png', format='png', dpi=300)
+plt.savefig(f'{path_to_save_charts}/number_of_introns_per_substring_len.png', format='png', dpi=300)
 plt.show()
 ###
 
@@ -228,7 +227,7 @@ index = np.arange(len(df_exons))
 
 # Zmiana kolejności słupków i ich pozycji
 bars_sum = ax.bar(index - 1.5*bar_width, df_exons['sum']/df_count['sum'], bar_width, alpha=opacity, edgecolor='black', color='#0d1949',
-                  label='Sum')
+                  label='Razem')
 bar_gra = ax.bar(index - 0.5*bar_width, df_exons['gra']/df_count['gra'], bar_width, alpha=opacity, edgecolor='black', color='#3e5a6f',
                  label='E. gracilis')
 bar_lon = ax.bar(index + 1.5*bar_width, df_exons['lon']/df_count['lon'], bar_width, alpha=opacity, edgecolor='black', color='#a0ddba',
@@ -242,20 +241,20 @@ ax.grid(True, linestyle='--', alpha=0.7)
 for bars in [bars_sum, bar_gra, bar_lon, bar_hie]:
     for bar in bars:
         yval = bar.get_height()
-        ax.text(bar.get_x() + bar.get_width()/2, yval, f"{yval:.2f}", ha='center', va='bottom', fontsize=8)
-ax.set_ylabel('Number of exons per intron', fontsize=12, labelpad=15)
-ax.set_xlabel('Minimal exon\'s length', fontsize=12, labelpad=15)
-ax.set_title('Number of exons per intron depending on exon\'s length', fontsize=18, pad=20)
+        ax.text(bar.get_x() + bar.get_width()/2, yval, f"{yval:.2f}", ha='center', va='bottom', fontsize=10)
+ax.set_ylabel('Liczba eksonów przypadająca na jeden intron', fontsize=14, labelpad=15)
+ax.set_xlabel('Minimalna długość eksonu otaczającego intron', fontsize=14, labelpad=15)
+ax.set_title('Stosunek liczby eksonów do liczby intronów zależności od minimalnej \ndługości eksonu', fontsize=18, pad=20)
 
 ax.set_xticks(index)
 ax.set_xticklabels(df_exons['min_ex_len'])
 ax.tick_params(axis='both', which='major', labelsize=10)
 ax.set_facecolor('#f5f5f5')
 
-ax.legend(handles=handles, labels=['Sum', 'E. gracilis', 'E. hiemalis', 'E. longa'], loc='upper center', bbox_to_anchor=(0.5, -0.15), ncol=4)
+ax.legend(handles=handles, labels=['Razem', 'E. gracilis', 'E. hiemalis', 'E. longa'], loc='upper center', bbox_to_anchor=(0.5, -0.15), ncol=4)
 
 plt.tight_layout()
-plt.savefig(f'{path_to_save_charts}/number_of_exons_per_intron.png', format='png', dpi=300)
+plt.savefig(f'{path_to_save_charts}/number_of_exons_per_intron_len.png', format='png', dpi=300)
 plt.show()
 ###
 
@@ -283,10 +282,10 @@ ax.grid(True, linestyle='--', alpha=0.7)
 for bars in [bars_sum, bar_gra, bar_lon, bar_hie]:
     for bar in bars:
         yval = bar.get_height()
-        ax.text(bar.get_x() + bar.get_width()/2, yval, f"{yval:.2f}", ha='center', va='bottom', fontsize=8)
-ax.set_ylabel('Average intron\'s length', fontsize=12, labelpad=15)
-ax.set_xlabel('Minimal exon\'s length', fontsize=12, labelpad=15)
-ax.set_title('Average intron\'s length depending on exon\'s length.png', fontsize=18, pad=20)
+        ax.text(bar.get_x() + bar.get_width()/2, yval, f"{yval:.0f}", ha='center', va='bottom', fontsize=10)
+ax.set_ylabel('Średnia długość intronów', fontsize=14, labelpad=15)
+ax.set_xlabel('Minimalna długość eksonu otaczającego intron', fontsize=14, labelpad=15)
+ax.set_title('Średnia długość intronu w zależności od minimalnej długości eksonu', fontsize=18, pad=20)
 
 ax.set_xticks(index)
 ax.set_xticklabels(df_av_int_len['min_ex_len'])
@@ -296,7 +295,7 @@ ax.set_facecolor('#f5f5f5')
 ax.legend(handles=handles, labels=['Total', 'E. gracilis', 'E. hiemalis', 'E. longa'], loc='upper center', bbox_to_anchor=(0.5, -0.15), ncol=4)
 
 plt.tight_layout()
-plt.savefig(f'{path_to_save_charts}/average_introns_length.png', format='png', dpi=300)
+plt.savefig(f'{path_to_save_charts}/average_introns_length_len.png', format='png', dpi=300)
 plt.show()
 ###
 
@@ -308,7 +307,7 @@ index = np.arange(len(df_unique))
 
 # Zmiana kolejności słupków i ich pozycji
 bars_sum = ax.bar(index - 1.5*bar_width, df_unique['sum'], bar_width, alpha=opacity, edgecolor='black', color='#0d1949',
-                  label='Sum')
+                  label='Razem')
 bar_gra = ax.bar(index - 0.5*bar_width, df_unique['gra'], bar_width, alpha=opacity, edgecolor='black', color='#3e5a6f',
                  label='E. gracilis')
 bar_lon = ax.bar(index + 1.5*bar_width, df_unique['lon'], bar_width, alpha=opacity, edgecolor='black', color='#a0ddba',
@@ -322,20 +321,20 @@ ax.grid(True, linestyle='--', alpha=0.7)
 for bars in [bars_sum, bar_gra, bar_lon, bar_hie]:
     for bar in bars:
         yval = bar.get_height()
-        ax.text(bar.get_x() + bar.get_width()/2, yval, f"{yval:.2f}", ha='center', va='bottom', fontsize=8)
-ax.set_ylabel('Number of unique ID sequences', fontsize=12, labelpad=15)
-ax.set_xlabel('Minimal exon\'s length', fontsize=12, labelpad=15)
-ax.set_title('Number of unique ID sequences depending on exon\'s length', fontsize=18, pad=20)
+        ax.text(bar.get_x() + bar.get_width()/2, yval, f"{yval:.0f}", ha='center', va='bottom', fontsize=10)
+ax.set_ylabel('Liczba sekwencji zawierających introny', fontsize=14, labelpad=15)
+ax.set_xlabel('Minimalna długość eksonu otaczającego intron', fontsize=14, labelpad=15)
+ax.set_title('Liczba sekwencji zawierających introny w zależności od minimalnej homologii eksonu', fontsize=18, pad=20)
 
 ax.set_xticks(index)
 ax.set_xticklabels(df_unique['min_ex_len'])
 ax.tick_params(axis='both', which='major', labelsize=10)
 ax.set_facecolor('#f5f5f5')
 
-ax.legend(handles=handles, labels=['Sum', 'E. gracilis', 'E. hiemalis', 'E. longa'], loc='upper center', bbox_to_anchor=(0.5, -0.15), ncol=4)
+ax.legend(handles=handles, labels=['Razem', 'E. gracilis', 'E. hiemalis', 'E. longa'], loc='upper center', bbox_to_anchor=(0.5, -0.15), ncol=4)
 
 plt.tight_layout()
-plt.savefig(f'{path_to_save_charts}/number_of_unique_seqid.png', format='png', dpi=300)
+plt.savefig(f'{path_to_save_charts}/number_of_unique_seqid_len.png', format='png', dpi=300)
 plt.show()
 ###
 
@@ -349,7 +348,7 @@ index = np.arange(len(df_sub))
 
 # Zmiana kolejności słupków i ich pozycji
 bars_sum = ax.bar(index - 1.5*bar_width, df_sub['sum'], bar_width, alpha=opacity, edgecolor='black', color='#0d1949',
-                  label='Sum')
+                  label='Razem')
 bar_gra = ax.bar(index - 0.5*bar_width, df_sub['gra'], bar_width, alpha=opacity, edgecolor='black', color='#3e5a6f',
                  label='E. gracilis')
 bar_lon = ax.bar(index + 1.5*bar_width, df_sub['lon'], bar_width, alpha=opacity, edgecolor='black', color='#a0ddba',
@@ -363,19 +362,19 @@ ax.grid(True, linestyle='--', alpha=0.7)
 for bars in [bars_sum, bar_gra, bar_lon, bar_hie]:
     for bar in bars:
         yval = bar.get_height()
-        ax.text(bar.get_x() + bar.get_width()/2, yval, f"{yval:.2f}", ha='center', va='bottom', fontsize=8)
-ax.set_ylabel('Number of substrings ', fontsize=12, labelpad=15)
-ax.set_xlabel('Minimal exon\'s length', fontsize=12, labelpad=15)
-ax.set_title('Number of substrings depending on exon\'s length', fontsize=18, pad=20)
+        ax.text(bar.get_x() + bar.get_width()/2, yval, f"{yval:.2f}", ha='center', va='bottom', fontsize=10)
+ax.set_ylabel('Liczba substringów ', fontsize=14, labelpad=15)
+ax.set_xlabel('Minimalna długość eksonu otaczającego intron', fontsize=14, labelpad=15)
+ax.set_title('Liczba substringów w zależności od minimalnej długości eksonu', fontsize=18, pad=20)
 
 ax.set_xticks(index)
 ax.set_xticklabels(df_sub['min_ex_len'])
 ax.tick_params(axis='both', which='major', labelsize=10)
 ax.set_facecolor('#f5f5f5')
 
-ax.legend(handles=handles, labels=['Sum', 'E. gracilis', 'E. hiemalis', 'E. longa'], loc='upper center', bbox_to_anchor=(0.5, -0.15), ncol=4)
+ax.legend(handles=handles, labels=['Razem', 'E. gracilis', 'E. hiemalis', 'E. longa'], loc='upper center', bbox_to_anchor=(0.5, -0.15), ncol=4)
 plt.tight_layout()
-plt.savefig(f'{path_to_save_charts}/number_of_substring.png', format='png', dpi=300)
+plt.savefig(f'{path_to_save_charts}/number_of_substring_len.png', format='png', dpi=300)
 plt.show()
 ###
 
@@ -387,7 +386,7 @@ index = np.arange(len(df_sub))
 
 # Zmiana kolejności słupków i ich pozycji
 bars_sum = ax.bar(index - 1.5*bar_width, df_sub['sum']/df_unique['sum'], bar_width, alpha=opacity, edgecolor='black', color='#0d1949',
-                  label='Sum')
+                  label='Razem')
 bar_gra = ax.bar(index - 0.5*bar_width, df_sub['gra']/df_unique['gra'], bar_width, alpha=opacity, edgecolor='black', color='#3e5a6f',
                  label='E. gracilis')
 bar_lon = ax.bar(index + 1.5*bar_width, df_sub['lon']/df_unique['lon'], bar_width, alpha=opacity, edgecolor='black', color='#a0ddba',
@@ -401,20 +400,20 @@ ax.grid(True, linestyle='--', alpha=0.7)
 for bars in [bars_sum, bar_gra, bar_lon, bar_hie]:
     for bar in bars:
         yval = bar.get_height()
-        ax.text(bar.get_x() + bar.get_width()/2, yval, f"{yval:.2f}", ha='center', va='bottom', fontsize=8)
-ax.set_ylabel('Number of substrings per sequence', fontsize=12, labelpad=15)
-ax.set_xlabel('Minimal exon\'s length', fontsize=12, labelpad=15)
-ax.set_title('Number of substrings per sequence depending on exon\'s length', fontsize=18, pad=20)
+        ax.text(bar.get_x() + bar.get_width()/2, yval, f"{yval:.0f}", ha='center', va='bottom', fontsize=10)
+ax.set_ylabel('Liczba substringów przypadająca na jedną sekwencję', fontsize=14, labelpad=15)
+ax.set_xlabel('Minimalna długość eksonu otaczającego intron', fontsize=14, labelpad=15)
+ax.set_title('Stosunek liczby substringów do liczby sekwencji w zależności od minimalnej długości eksonu', fontsize=18, pad=20)
 
 ax.set_xticks(index)
 ax.set_xticklabels(df_sub['min_ex_len'])
 ax.tick_params(axis='both', which='major', labelsize=10)
 ax.set_facecolor('#f5f5f5')
 
-ax.legend(handles=handles, labels=['Sum', 'E. gracilis', 'E. hiemalis', 'E. longa'], loc='upper center', bbox_to_anchor=(0.5, -0.15), ncol=4)
+ax.legend(handles=handles, labels=['Razem', 'E. gracilis', 'E. hiemalis', 'E. longa'], loc='upper center', bbox_to_anchor=(0.5, -0.15), ncol=4)
 
 plt.tight_layout()
-plt.savefig(f'{path_to_save_charts}/number_of_substring_per_sequence.png', format='png', dpi=300)
+plt.savefig(f'{path_to_save_charts}/number_of_substring_per_sequence_len.png', format='png', dpi=300)
 plt.show()
 ###
 
@@ -429,7 +428,7 @@ index = np.arange(len(df_exons))
 
 # Zmiana kolejności słupków i ich pozycji
 bars_sum = ax.bar(index - 1.5*bar_width, df_exons['sum'], bar_width, alpha=opacity, edgecolor='black', color='#0d1949',
-                  label='Sum')
+                  label='Razem')
 bar_gra = ax.bar(index - 0.5*bar_width, df_exons['gra'], bar_width, alpha=opacity, edgecolor='black', color='#3e5a6f',
                  label='E. gracilis')
 bar_lon = ax.bar(index + 1.5*bar_width, df_exons['lon'], bar_width, alpha=opacity, edgecolor='black', color='#a0ddba',
@@ -443,20 +442,20 @@ ax.grid(True, linestyle='--', alpha=0.7)
 for bars in [bars_sum, bar_gra, bar_lon, bar_hie]:
     for bar in bars:
         yval = bar.get_height()
-        ax.text(bar.get_x() + bar.get_width()/2, yval, f"{yval:.2f}", ha='center', va='bottom', fontsize=8)
-ax.set_ylabel('Number of exons', fontsize=12, labelpad=15)
-ax.set_xlabel('Minimal exon\'s length', fontsize=12, labelpad=15)
-ax.set_title('Number of exons depending on exon\'s length', fontsize=18, pad=20)
+        ax.text(bar.get_x() + bar.get_width()/2, yval, f"{yval:.0f}", ha='center', va='bottom', fontsize=10)
+ax.set_ylabel('Liczba eksonów', fontsize=14, labelpad=15)
+ax.set_xlabel('Minimalna długość eksonu otaczającego intron', fontsize=14, labelpad=15)
+ax.set_title('Liczba eksonów w zależności od minimalnej długości eksonu', fontsize=18, pad=20)
 
 ax.set_xticks(index)
 ax.set_xticklabels(df_exons['min_ex_len'])
 ax.tick_params(axis='both', which='major', labelsize=10)
 ax.set_facecolor('#f5f5f5')
 
-ax.legend(handles=handles, labels=['Sum', 'E. gracilis', 'E. hiemalis', 'E. longa'], loc='upper center', bbox_to_anchor=(0.5, -0.15), ncol=4)
+ax.legend(handles=handles, labels=['Razem', 'E. gracilis', 'E. hiemalis', 'E. longa'], loc='upper center', bbox_to_anchor=(0.5, -0.15), ncol=4)
 
 plt.tight_layout()
-plt.savefig(f'{path_to_save_charts}/number_of_exons.png', format='png', dpi=300)
+plt.savefig(f'{path_to_save_charts}/number_of_exons_len.png', format='png', dpi=300)
 plt.show()
 ###
 
@@ -468,7 +467,7 @@ index = np.arange(len(df_exons))
 
 # Zmiana kolejności słupków i ich pozycji
 bars_sum = ax.bar(index - 1.5*bar_width, df_exons['sum']/df_unique['sum'], bar_width, alpha=opacity, edgecolor='black', color='#0d1949',
-                  label='Sum')
+                  label='Razem')
 bar_gra = ax.bar(index - 0.5*bar_width, df_exons['gra']/df_unique['gra'], bar_width, alpha=opacity, edgecolor='black', color='#3e5a6f',
                  label='E. gracilis')
 bar_lon = ax.bar(index + 1.5*bar_width, df_exons['lon']/df_unique['lon'], bar_width, alpha=opacity, edgecolor='black', color='#a0ddba',
@@ -482,20 +481,20 @@ ax.grid(True, linestyle='--', alpha=0.7)
 for bars in [bars_sum, bar_gra, bar_lon, bar_hie]:
     for bar in bars:
         yval = bar.get_height()
-        ax.text(bar.get_x() + bar.get_width()/2, yval, f"{yval:.2f}", ha='center', va='bottom', fontsize=8)
-ax.set_ylabel('Number of exons per sequence', fontsize=12, labelpad=15)
-ax.set_xlabel('Minimal exon\'s length', fontsize=12, labelpad=15)
-ax.set_title('Number of exons per sequence depending on exon\'s length', fontsize=18, pad=20)
+        ax.text(bar.get_x() + bar.get_width()/2, yval, f"{yval:.2f}", ha='center', va='bottom', fontsize=10)
+ax.set_ylabel('Liczba eksonów przypadająca na jeden substring', fontsize=14, labelpad=15)
+ax.set_xlabel('Minimalna długość eksonu otaczającego intron', fontsize=14, labelpad=15)
+ax.set_title('Stosunek liczby eksonów do liczby sekwencji w zależności od minimalnej długości eksonu', fontsize=18, pad=20)
 
 ax.set_xticks(index)
 ax.set_xticklabels(df_unique['min_ex_len'])
 ax.tick_params(axis='both', which='major', labelsize=10)
 ax.set_facecolor('#f5f5f5')
 
-ax.legend(handles=handles, labels=['Sum', 'E. gracilis', 'E. hiemalis', 'E. longa'], loc='upper center', bbox_to_anchor=(0.5, -0.15), ncol=4)
+ax.legend(handles=handles, labels=['Razem', 'E. gracilis', 'E. hiemalis', 'E. longa'], loc='upper center', bbox_to_anchor=(0.5, -0.15), ncol=4)
 
 plt.tight_layout()
-plt.savefig(f'{path_to_save_charts}/number_of_exons_per_sequence.png', format='png', dpi=300)
+plt.savefig(f'{path_to_save_charts}/number_of_exons_per_sequence_len.png', format='png', dpi=300)
 plt.show()
 ###
 
@@ -508,7 +507,7 @@ index = np.arange(len(df_exons))
 
 # Zmiana kolejności słupków i ich pozycji
 bars_sum = ax.bar(index - 1.5*bar_width, df_exons['sum']/df_sub['sum'], bar_width, alpha=opacity, edgecolor='black', color='#0d1949',
-                  label='Sum')
+                  label='Razem')
 bar_gra = ax.bar(index - 0.5*bar_width, df_exons['gra']/df_sub['gra'], bar_width, alpha=opacity, edgecolor='black', color='#3e5a6f',
                  label='E. gracilis')
 bar_lon = ax.bar(index + 1.5*bar_width, df_exons['lon']/df_sub['lon'], bar_width, alpha=opacity, edgecolor='black', color='#a0ddba',
@@ -522,19 +521,19 @@ ax.grid(True, linestyle='--', alpha=0.7)
 for bars in [bars_sum, bar_gra, bar_lon, bar_hie]:
     for bar in bars:
         yval = bar.get_height()
-        ax.text(bar.get_x() + bar.get_width()/2, yval, f"{yval:.2f}", ha='center', va='bottom', fontsize=8)
-ax.set_ylabel('Number of exons per substring', fontsize=12, labelpad=15)
-ax.set_xlabel('Minimal exon\'s length', fontsize=12, labelpad=15)
-ax.set_title('Number of exons per substring depending on exon\'s length', fontsize=18, pad=20)
+        ax.text(bar.get_x() + bar.get_width()/2, yval, f"{yval:.2f}", ha='center', va='bottom', fontsize=10)
+ax.set_ylabel('Liczba eksonów przypadająca na jeden substring', fontsize=14, labelpad=15)
+ax.set_xlabel('Minimalna długość eksonu otaczającego intron', fontsize=14, labelpad=15)
+ax.set_title('Stosunek liczby eksonóœ do liczby substringów w zależności od minimalnej\ndługości eksonu', fontsize=18, pad=20)
 
 ax.set_xticks(index)
 ax.set_xticklabels(df_sub['min_ex_len'])
 ax.tick_params(axis='both', which='major', labelsize=10)
 ax.set_facecolor('#f5f5f5')
 
-ax.legend(handles=handles, labels=['Sum', 'E. gracilis', 'E. hiemalis', 'E. longa'], loc='upper center', bbox_to_anchor=(0.5, -0.15), ncol=4)
+ax.legend(handles=handles, labels=['Razem', 'E. gracilis', 'E. hiemalis', 'E. longa'], loc='upper center', bbox_to_anchor=(0.5, -0.15), ncol=4)
 
 plt.tight_layout()
-plt.savefig(f'{path_to_save_charts}/number_of_exons_per_substring.png', format='png', dpi=300)
+plt.savefig(f'{path_to_save_charts}/number_of_exons_per_substring_len.png', format='png', dpi=300)
 plt.show()
 ###
